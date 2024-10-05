@@ -1,0 +1,15 @@
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+/config
+/src/go.sum
+/logs
+/avatars
+/pkg
+/codefiles
+/certificate
