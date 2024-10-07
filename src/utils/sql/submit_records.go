@@ -18,7 +18,7 @@ func SelectSubmitRecordsByUid(uid int) []global.SubmitRecord {
 func SelectAllSubmitRecords() []global.SubmitRecord {
 	var records []global.SubmitRecord
 	utils.ConnectSql().
-		Where("time > ?", time.Now().Add(-30*24*time.Hour)).Order("time desc").Find(&records)
+		Where("time > ?", time.Now().Add(-30*24*time.Hour)).Joins("JOIN users ON users.uid = submit_records.uid").Order("time desc").Find(&records)
 	return records
 }
 
