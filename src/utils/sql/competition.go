@@ -7,9 +7,9 @@ import (
 
 // 用户获取竞赛信息
 func SelectCompetitionInfo() []global.CompetitionRequest {
-	var competition []global.CompetitionRequest
-	utils.ConnectSql().Table("competitions").Where("is_visible = ?", true).Order("start_at DESC").Find(&competition)
-	return competition
+	var competitions []global.CompetitionRequest
+	utils.ConnectSql().Table("competitions").Where("is_visible = ?", true).Order("start_at DESC").Find(&competitions)
+	return competitions
 }
 
 // 管理员获取竞赛信息
@@ -28,7 +28,8 @@ func SelectCompetitionInfoAdminByCid(Cid int) global.AdminCompetitionInfoRequest
 
 // 管理员删除竞赛
 func DeleteCompetition(Cid int) bool {
-	return utils.ConnectSql().Table("competitions").Where("contest_id = ?", Cid).Delete(&global.CompetitionRequest{}) != nil
+	result := utils.ConnectSql().Table("competitions").Where("contest_id = ?", Cid).Delete(&global.CompetitionRequest{})
+	return result.RowsAffected > 0
 }
 
 // 管理员更新/添加竞赛

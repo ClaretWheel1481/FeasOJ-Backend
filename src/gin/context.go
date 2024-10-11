@@ -178,17 +178,23 @@ func UploadAvatar(c *gin.Context) {
 		return
 	}
 	newFilename := fmt.Sprintf("%d%s", userInfo.Uid, path.Ext(file.Filename))
-	filePath := filepath.Join(global.AvatarsDir, newFilename)
-	if _, err := os.Stat(filePath); err == nil {
-		os.Remove(filePath)
+	originalFilePath := filepath.Join(global.AvatarsDir, newFilename)
+	compressedFilePath := filepath.Join(global.AvatarsDir, fmt.Sprintf("%d%s", userInfo.Uid, path.Ext(file.Filename)))
+	if _, err := os.Stat(compressedFilePath); err == nil {
+		os.Remove(compressedFilePath)
 	}
-	// 上传头像至指定路径
-	if err := c.SaveUploadedFile(file, filePath); err != nil {
+	// 保存原始文件
+	if err := c.SaveUploadedFile(file, originalFilePath); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "internal server error"})
 		return
 	}
-	// 上传头像路径至数据库
-	if !sql.UpdateAvatar(username, filepath.Join(newFilename)) {
+	// 压缩图像
+	if err := utils.CompressImage(originalFilePath, compressedFilePath); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+	// 上传压缩后的头像路径至数据库
+	if !sql.UpdateAvatar(username, newFilename) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "internal server error"})
 		return
 	}
