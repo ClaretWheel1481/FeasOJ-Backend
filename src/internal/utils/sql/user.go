@@ -1,8 +1,8 @@
 package sql
 
 import (
-	"src/global"
-	"src/utils"
+	"src/internal/global"
+	"src/internal/utils"
 	"time"
 
 	"github.com/google/uuid"

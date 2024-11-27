@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"src/global"
+	"src/internal/global"
 	"time"
 )
 

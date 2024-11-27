@@ -8,9 +8,9 @@ import (
 	"path"
 	"path/filepath"
 	"src/config"
-	"src/global"
-	"src/utils"
-	"src/utils/sql"
+	"src/internal/global"
+	"src/internal/utils"
+	"src/internal/utils/sql"
 	"strconv"
 
 	"github.com/gin-gonic/gin"

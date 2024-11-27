@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"src/global"
+	"src/internal/global"
 )
 
 // 写入配置到文件

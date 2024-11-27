@@ -3,8 +3,8 @@ package middleware
 import (
 	"net/http"
 	"net/url"
-	"src/utils"
-	"src/utils/sql"
+	"src/internal/utils"
+	"src/internal/utils/sql"
 
 	"github.com/gin-gonic/gin"
 )

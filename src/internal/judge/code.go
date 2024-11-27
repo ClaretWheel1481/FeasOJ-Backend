@@ -1,8 +1,8 @@
-package codehandler
+package judge
 
 import (
 	"log"
-	"src/utils/sql"
+	"src/internal/utils/sql"
 	"strconv"
 	"strings"
 	"time"

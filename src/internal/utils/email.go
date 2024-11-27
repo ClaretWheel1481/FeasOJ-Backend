@@ -4,7 +4,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"math/rand"
-	"src/global"
+	"src/internal/global"
 	"time"
 
 	"gopkg.in/gomail.v2"
@@ -31,6 +31,21 @@ func SendVerifycode(config global.MailConfig, to string, verifycode string) bool
 	rdb := ConnectRedis()
 	err := rdb.Set(to, verifycode, 5*time.Minute).Err()
 	return err == nil
+}
+
+// 测试发送
+func TestSend(config global.MailConfig) bool {
+	m := gomail.NewMessage()
+	m.SetAddressHeader("From", config.User, "FeasOJ")
+	m.SetHeader("To", config.User)
+	m.SetHeader("Subject", "FeasOJ测试邮件")
+	m.SetBody("text/html", "<div style='text-align: center;'><h1><b>FeasOJ</b></h1><p>这是一封测试邮件，看到该邮件意味着FeasOJ Email Service运行正常。</p></div>")
+	d := gomail.NewDialer(config.Host, config.Port, config.User, config.Password)
+	d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+	if err := d.DialAndSend(m); err != nil {
+		return false
+	}
+	return true
 }
 
 // 检验Redis中验证码与前端返回的是否相同

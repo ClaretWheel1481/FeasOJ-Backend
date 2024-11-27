@@ -1,4 +1,4 @@
-package codehandler
+package judge
 
 import (
 	"context"
@@ -7,8 +7,8 @@ import (
 	"log"
 	"os/exec"
 	"path/filepath"
-	"src/global"
-	"src/utils/sql"
+	"src/internal/global"
+	"src/internal/utils/sql"
 	"strings"
 	"time"
 

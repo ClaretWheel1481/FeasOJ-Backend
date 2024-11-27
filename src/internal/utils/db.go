@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"src/config"
-	"src/global"
+	"src/internal/global"
 	"time"
 
 	"github.com/google/uuid"
@@ -18,11 +18,11 @@ func InitAdminAccount() (string, string, string, string, int) {
 	var adminPassword string
 	var adminEmail string
 	log.Println("[FeasOJ]Please input the administrator account configuration: ")
-	fmt.Print("[FeasOJ]Admin account: ")
+	fmt.Print("[FeasOJ]Username: ")
 	fmt.Scanln(&adminUsername)
-	fmt.Print("[FeasOJ]Admin password: ")
+	fmt.Print("[FeasOJ]Password: ")
 	fmt.Scanln(&adminPassword)
-	fmt.Print("[FeasOJ]Admin email: ")
+	fmt.Print("[FeasOJ]Email: ")
 	fmt.Scanln(&adminEmail)
 
 	return adminUsername, EncryptPassword(adminPassword), adminEmail, uuid.New().String(), 1
@@ -48,7 +48,7 @@ func ConnectSql() *gorm.DB {
 		return nil
 	}
 
-	// 设置连接池避免数据库连接过多导致的性能问题
+	// TODO:设置连接池避免数据库连接过多导致的性能问题
 	sqlDB.SetMaxIdleConns(10)
 	sqlDB.SetMaxOpenConns(100)
 	sqlDB.SetConnMaxLifetime(time.Second * 6)

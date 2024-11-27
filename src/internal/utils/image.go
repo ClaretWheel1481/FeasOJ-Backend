@@ -42,3 +42,5 @@ func CompressImage(inputPath, outputPath string) error {
 	err = png.Encode(out, newImage)
 	return err
 }
+
+// TODO: 接入本地模型判断图片是否违规
