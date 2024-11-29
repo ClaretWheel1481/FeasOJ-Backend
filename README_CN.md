@@ -16,15 +16,17 @@ FeasOJ 是一个基于 Vue 和 Golang 的在线编程练习平台，旨在为用
 FeasOJ-Backend
 │ 
 ├─src
-│  ├─codehandler
 │  ├─config
-│  ├─gin
-│  ├─global
-│  ├─middleware
-│  ├─utils
-│  │  └─sql
-│  ├─main.go
-│  └─go.mod
+│  ├─internal
+│  │  ├─gin
+│  │  ├─global
+│  │  ├─judge
+│  │  ├─middlewares
+│  │  ├─router
+│  │  └─utils
+│  │     └─sql
+│  ├─go.mod
+│  └─main.go    # 程序主入口
 └─Sandbox
 ```
 

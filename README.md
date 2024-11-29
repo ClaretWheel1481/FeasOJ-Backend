@@ -17,15 +17,17 @@ FeasOJ is an online programming practice platform based on Vue and Golang, aimin
 FeasOJ-Backend
 │ 
 ├─src
-│  ├─codehandler
 │  ├─config
-│  ├─gin
-│  ├─global
-│  ├─middleware
-│  ├─utils
-│  │  └─sql
-│  ├─main.go
-│  └─go.mod
+│  ├─internal
+│  │  ├─gin
+│  │  ├─global
+│  │  ├─judge
+│  │  ├─middlewares
+│  │  ├─router
+│  │  └─utils
+│  │     └─sql
+│  ├─go.mod
+│  └─main.go    # Main entry file
 └─Sandbox
 ```
 
