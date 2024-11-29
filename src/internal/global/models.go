@@ -230,9 +230,11 @@ type Competition struct {
 	End_at       time.Time `gorm:"comment:结束时间;not null"`
 }
 
-// 竞赛参加表: ContestID, Uid, Username
-type CompetitionUser struct {
-	ContestID int    `gorm:"comment:比赛ID;primaryKey;autoIncrement;not null"`
-	Uid       int    `gorm:"comment:用户ID;not null"`
-	Username  string `gorm:"comment:用户名;not null"`
+// 用户竞赛关系表: ContestID, Uid, Username, Join_date, End_date
+type UserCompetitions struct {
+	ContestID int       `gorm:"comment:比赛ID;not null"`
+	Uid       int       `gorm:"comment:用户ID;not null"`
+	Username  string    `gorm:"comment:用户名;not null"`
+	Join_date time.Time `gorm:"comment:加入时间;not null"`
+	End_date  time.Time `gorm:"comment:结束时间;not null"`
 }

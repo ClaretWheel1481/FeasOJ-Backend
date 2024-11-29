@@ -30,7 +30,16 @@ func InitAdminAccount() (string, string, string, string, int) {
 
 // 创建表
 func InitTable() bool {
-	ConnectSql().AutoMigrate(&global.User{}, &global.Problem{}, &global.SubmitRecord{}, &global.Discussion{}, &global.Comment{}, &global.TestCase{}, &global.Competition{})
+	ConnectSql().AutoMigrate(
+		&global.User{},
+		&global.Problem{},
+		&global.SubmitRecord{},
+		&global.Discussion{},
+		&global.Comment{},
+		&global.TestCase{},
+		&global.Competition{},
+		&global.UserCompetitions{},
+	)
 	return true
 }
 
@@ -48,7 +57,7 @@ func ConnectSql() *gorm.DB {
 		return nil
 	}
 
-	// TODO:设置连接池避免数据库连接过多导致的性能问题
+	// TODO:自行设置连接池避免数据库连接过多导致的性能问题
 	sqlDB.SetMaxIdleConns(10)
 	sqlDB.SetMaxOpenConns(100)
 	sqlDB.SetConnMaxLifetime(time.Second * 6)
