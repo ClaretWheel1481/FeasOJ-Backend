@@ -41,7 +41,7 @@ func BuildImage() bool {
 		Tags:       []string{"judgecore:latest"}, // 镜像标签
 	}
 
-	log.Println("[FeasOJ]SandBox is being built...")
+	log.Println("[FeasOJ] SandBox is being built...")
 	// 构建Docker镜像
 	buildResponse, err := cli.ImageBuild(ctx, tar, buildOptions)
 	if err != nil {
@@ -142,7 +142,8 @@ func CompileAndRun(filename string) string {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	// 获取输入输出样例
+	// 两种方案：1、数据库存放输入输出样例 2、in，out文件存放输入输出样例，数据库存放对应文件路径
+	// 数据库获取输入输出样例
 	testCases := sql.SelectTestCasesByPid(strings.Split(filename, "_")[1])
 	for _, testCase := range testCases {
 		var runCmd *exec.Cmd

@@ -2,7 +2,7 @@ package router
 
 import (
 	gincontext "src/internal/gin"
-	"src/internal/middleware"
+	"src/internal/middlewares"
 
 	"github.com/gin-gonic/gin"
 )
@@ -10,7 +10,7 @@ import (
 func LoadRouter(r *gin.Engine) *gin.RouterGroup {
 	// 设置路由组
 	router1 := r.Group("/api/v1")
-	router1.Use(middleware.Logger())
+	router1.Use(middlewares.Logger())
 	{
 		// 注册API
 		router1.POST("/register", gincontext.Register)
@@ -30,7 +30,7 @@ func LoadRouter(r *gin.Engine) *gin.RouterGroup {
 		// 密码修改API
 		router1.PUT("/users/password", gincontext.UpdatePassword)
 
-		router1.Use(middleware.HeaderVerify())
+		router1.Use(middlewares.HeaderVerify())
 		{
 			// 验证用户信息API
 			router1.GET("/verify", gincontext.VerifyUserInfo)

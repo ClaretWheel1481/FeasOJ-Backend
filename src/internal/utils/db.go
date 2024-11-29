@@ -17,12 +17,12 @@ func InitAdminAccount() (string, string, string, string, int) {
 	var adminUsername string
 	var adminPassword string
 	var adminEmail string
-	log.Println("[FeasOJ]Please input the administrator account configuration: ")
-	fmt.Print("[FeasOJ]Username: ")
+	log.Println("[FeasOJ] Please input the administrator account configuration: ")
+	fmt.Print("[FeasOJ] Username: ")
 	fmt.Scanln(&adminUsername)
-	fmt.Print("[FeasOJ]Password: ")
+	fmt.Print("[FeasOJ] Password: ")
 	fmt.Scanln(&adminPassword)
-	fmt.Print("[FeasOJ]Email: ")
+	fmt.Print("[FeasOJ] Email: ")
 	fmt.Scanln(&adminEmail)
 
 	return adminUsername, EncryptPassword(adminPassword), adminEmail, uuid.New().String(), 1
@@ -39,12 +39,12 @@ func ConnectSql() *gorm.DB {
 	dsn := config.LoadSqlConfig()
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Println("[FeasOJ]Database connection failed, please go to config.xml manually to configure.")
+		log.Println("[FeasOJ] Database connection failed, please go to config.xml manually to configure.")
 		return nil
 	}
 	sqlDB, err := db.DB()
 	if err != nil {
-		log.Println("[FeasOJ]Failed to get generic database object.")
+		log.Println("[FeasOJ] Failed to get generic database object.")
 		return nil
 	}
 

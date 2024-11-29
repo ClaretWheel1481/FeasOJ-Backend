@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"time"
 
 	"src/config"
 	"src/internal/global"
@@ -21,7 +22,7 @@ import (
 )
 
 func main() {
-	log.Println("[FeasOJ]The server is starting...")
+	log.Println("[FeasOJ] The server is starting...")
 	global.CurrentDir, _ = os.Getwd()
 	global.ParentDir = filepath.Dir(global.CurrentDir)
 
@@ -46,7 +47,7 @@ func main() {
 	// 初始化Logger
 	logFile, err := utils.InitializeLogger()
 	if err != nil {
-		log.Fatalf("[FeasOJ]Failed to initialize logger: %v", err)
+		log.Fatalf("[FeasOJ] Failed to initialize logger: %v", err)
 	}
 	defer utils.CloseLogger(logFile)
 
@@ -61,24 +62,24 @@ func main() {
 
 	// 初始化管理员账户
 	if sql.SelectAdminUser(1) {
-		log.Println("[FeasOJ]The administrator account already exists and will continue.")
+		log.Println("[FeasOJ] The administrator account already exists and will continue.")
 	} else {
 		sql.Register(utils.InitAdminAccount())
 	}
-	log.Println("[FeasOJ]MySQL initialization complete.")
+	log.Println("[FeasOJ] MySQL initialization complete.")
 
 	// 测试邮箱模块是否正常
 	if !utils.TestSend(config.InitEmailConfig()) {
-		log.Println("[FeasOJ]Email service startup failed, please check the configuration.")
+		log.Println("[FeasOJ] Email service startup failed, please check the configuration.")
 	} else {
-		log.Println("[FeasOJ]Email service initialization complete.")
+		log.Println("[FeasOJ] Email service initialization complete.")
 	}
 
 	// 构建沙盒镜像
 	if judge.BuildImage() {
-		log.Println("[FeasOJ]SandBox builds successfully.")
+		log.Println("[FeasOJ] SandBox builds successfully.")
 	} else {
-		log.Println("[FeasOJ]SandBox builds fail, please make sure Docker is running and up to date!")
+		log.Println("[FeasOJ] SandBox builds fail, please make sure Docker is running and up to date!")
 		return
 	}
 
@@ -90,35 +91,38 @@ func main() {
 	// 挂载头像文件夹
 	r.StaticFS("/avatar", http.Dir(global.AvatarsDir))
 
-	log.Println("[FeasOJ]Server activated.")
-
 	// 实时检测Redis JudgeTask中是否有任务
 	rdb := utils.ConnectRedis()
 	go judge.ProcessJudgeTasks(rdb)
 
-	// TODO: 注意注意！！
-	// HTTP服务器
-	go func() {
-		if err := r.Run("0.0.0.0:37881"); err != nil {
-			log.Printf("[FeasOJ]Server start error: %v\n", err)
-			return
+	startServer := func(protocol, address, certFile, keyFile string) {
+		for {
+			var err error
+			if protocol == "http" {
+				err = r.Run(address)
+			} else {
+				err = r.RunTLS(address, certFile, keyFile)
+			}
+			if err != nil {
+				log.Printf("[FeasOJ] Server start error: %v\n", err)
+				time.Sleep(5 * time.Second)
+				continue
+			}
+			break
 		}
-	}()
+	}
+	// TODO: 根据需求调整
+	// go startServer("https", "0.0.0.0:37881", "./certificate/fullchain.pem", "./certificate/privkey.pem")
+	go startServer("http", "0.0.0.0:37881", "", "")
 
-	// 启动HTTPS服务器
-	// go func() {
-	// 	if err := r.RunTLS("0.0.0.0:37881", "./certificate/fullchain.pem", "./certificate/privkey.pem"); err != nil {
-	// 		log.Printf("[FeasOJ]Server start error: %v\n", err)
-	// 		return
-	// 	}
-	// }()
+	log.Println("[FeasOJ] Server activated.")
 
 	// 监听终端输入
 	go func() {
 		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
 			if scanner.Text() == "quit" {
-				log.Println("[FeasOJ]The server is being shut down....")
+				log.Println("[FeasOJ] The server is being shut down....")
 				os.Exit(0)
 			}
 		}
@@ -127,10 +131,10 @@ func main() {
 	// 等待中断信号关闭服务器
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	log.Println("[FeasOJ]Input 'quit' or Ctrl+C to stop the server.")
+	log.Println("[FeasOJ] Input 'quit' or Ctrl+C to stop the server.")
 	<-quit
 
 	// 关闭服务器前的清理工作
-	log.Println("[FeasOJ]The server is shutting down...")
+	log.Println("[FeasOJ] The server is shutting down...")
 	utils.CloseLogger(logFile)
 }

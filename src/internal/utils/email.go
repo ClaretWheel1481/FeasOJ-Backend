@@ -39,7 +39,7 @@ func TestSend(config global.MailConfig) bool {
 	m.SetAddressHeader("From", config.User, "FeasOJ")
 	m.SetHeader("To", config.User)
 	m.SetHeader("Subject", "FeasOJ测试邮件")
-	m.SetBody("text/html", "<div style='text-align: center;'><h1><b>FeasOJ</b></h1><p>这是一封测试邮件，看到该邮件意味着FeasOJ Email Service运行正常。</p></div>")
+	m.SetBody("text/html", "<div style='text-align: center;'><h1><b>FeasOJ</b></h1><p>这是一封测试邮件，看到该邮件意味着FeasOJ Email服务运行正常。</p></div>")
 	d := gomail.NewDialer(config.Host, config.Port, config.User, config.Password)
 	d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 	if err := d.DialAndSend(m); err != nil {

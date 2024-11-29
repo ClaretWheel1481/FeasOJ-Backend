@@ -44,16 +44,16 @@ func InitConfig() {
 // 初始化并保存Sql配置
 func InputSqlInfo() bool {
 	var sqlConfig global.SqlConfig
-	log.Println("[FeasOJ]Please input the MySQL connection configuration：")
-	fmt.Print("[FeasOJ]Database name: ")
-	fmt.Scanln(&sqlConfig.DbName)
-	fmt.Print("[FeasOJ]Database address with port: ")
+	log.Println("[FeasOJ] Please input the MySQL connection configuration：")
+	fmt.Print("[FeasOJ] Database address with port: ")
 	fmt.Scanln(&sqlConfig.DbAddress)
-	fmt.Print("[FeasOJ]Database user: ")
+	fmt.Print("[FeasOJ] Database name: ")
+	fmt.Scanln(&sqlConfig.DbName)
+	fmt.Print("[FeasOJ] Database user: ")
 	fmt.Scanln(&sqlConfig.DbUser)
-	fmt.Print("[FeasOJ]Database password: ")
+	fmt.Print("[FeasOJ] Database password: ")
 	fmt.Scanln(&sqlConfig.DbPassword)
-	log.Println("[FeasOJ]Saving the connection configuration...")
+	log.Println("[FeasOJ] Saving the connection configuration...")
 
 	filePath := filepath.Join(global.ConfigDir, "config.xml")
 	config := global.Config{}
@@ -70,7 +70,7 @@ func LoadSqlConfig() string {
 	filePath := filepath.Join(global.ConfigDir, "config.xml")
 	config, err := ReadConfigFromFile(filePath)
 	if err != nil {
-		log.Println("Error loading SQL config: ", err)
+		log.Println("[FeasOJ] Error loading SQL config: ", err)
 		return ""
 	}
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Asia%%2FShanghai",
@@ -81,17 +81,17 @@ func LoadSqlConfig() string {
 // 初始化并保存Redis配置
 func InputRedisInfo() bool {
 	var redisConfig global.RedisConfig
-	log.Println("[FeasOJ]Please input the Redis connection configuration：")
-	fmt.Print("[FeasOJ]Redis address with port: ")
+	log.Println("[FeasOJ] Please input the Redis connection configuration：")
+	fmt.Print("[FeasOJ] Redis address with port: ")
 	fmt.Scanln(&redisConfig.Address)
-	fmt.Print("[FeasOJ]Redis password: ")
+	fmt.Print("[FeasOJ] Redis password: ")
 	fmt.Scanln(&redisConfig.Password)
 
 	filePath := filepath.Join(global.ConfigDir, "config.xml")
 	config := global.Config{}
 	config.RedisConfig = redisConfig
 	if err := WriteConfigToFile(filePath, config); err != nil {
-		log.Println("Error saving Redis config: ", err)
+		log.Println("[FeasOJ] Error saving Redis config: ", err)
 		return false
 	}
 	return true
@@ -102,7 +102,7 @@ func LoadRedisConfig() global.RedisConfig {
 	filePath := filepath.Join(global.ConfigDir, "config.xml")
 	config, err := ReadConfigFromFile(filePath)
 	if err != nil {
-		log.Println("Error loading Redis config: ", err)
+		log.Println("[FeasOJ] Error loading Redis config: ", err)
 	}
 	return config.RedisConfig
 }
@@ -110,11 +110,11 @@ func LoadRedisConfig() global.RedisConfig {
 // 初始化并保存Email配置
 func InputMailConfig() {
 	var mailConfig global.MailConfig
-	fmt.Print("[FeasOJ]Host of email server(e.g. smtp.qq.com): ")
+	fmt.Print("[FeasOJ] Host of email server(e.g. smtp.qq.com): ")
 	fmt.Scanln(&mailConfig.Host)
-	fmt.Print("[FeasOJ]Email address: ")
+	fmt.Print("[FeasOJ] Email address: ")
 	fmt.Scanln(&mailConfig.User)
-	fmt.Print("[FeasOJ]Email Password: ")
+	fmt.Print("[FeasOJ] Email Password: ")
 	fmt.Scanln(&mailConfig.Password)
 	mailConfig.Port = 465
 
@@ -122,7 +122,7 @@ func InputMailConfig() {
 	config := global.Config{}
 	config.MailConfig = mailConfig
 	if err := WriteConfigToFile(filePath, config); err != nil {
-		log.Println("Error saving email config:", err)
+		log.Println("[FeasOJ] Error saving email config:", err)
 	}
 }
 
@@ -131,7 +131,7 @@ func InitEmailConfig() global.MailConfig {
 	filePath := filepath.Join(global.ConfigDir, "config.xml")
 	config, err := ReadConfigFromFile(filePath)
 	if err != nil {
-		log.Println("Error loading Email config: ", err)
+		log.Println("[FeasOJ] Error loading Email config: ", err)
 	}
 	return config.MailConfig
 }
