@@ -52,7 +52,7 @@ func BuildImage() bool {
 	// 打印构建响应
 	_, err = io.Copy(log.Writer(), buildResponse.Body)
 	if err != nil {
-		log.Printf("Error copying build response: %v", err)
+		log.Printf("[FeasOJ] Error copying build response: %v", err)
 	}
 
 	return true
@@ -177,6 +177,7 @@ func CompileAndRun(filename string) string {
 			return "Wrong Answer"
 		}
 	}
+	// TODO: 第二种方案，读取in，out文件
 	TerminateContainer(global.ContainerID)
 	return "Success"
 }

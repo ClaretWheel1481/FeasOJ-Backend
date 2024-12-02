@@ -41,7 +41,7 @@ func GenerateToken(username string) (string, error) {
 	// 生成Token
 	tokenString, err := token.SignedString([]byte(SelectUser(username).TokenSecret))
 	if err != nil {
-		return "", fmt.Errorf("生成Token失败：%v", err)
+		return "", fmt.Errorf("[FeasOJ] Generate token error：%v", err)
 	}
 	return tokenString, nil
 }
