@@ -56,10 +56,10 @@ func InputSqlInfo() bool {
 	log.Println("[FeasOJ] Saving the connection configuration...")
 
 	filePath := filepath.Join(global.ConfigDir, "config.xml")
-	config := global.Config{}
+	config, _ := ReadConfigFromFile(filePath)
 	config.SqlConfig = sqlConfig
 	if err := WriteConfigToFile(filePath, config); err != nil {
-		log.Println("Error saving SQL config: ", err)
+		log.Println("[FeasOJ] Error saving SQL config: ", err)
 		return false
 	}
 	return true
@@ -88,7 +88,7 @@ func InputRedisInfo() bool {
 	fmt.Scanln(&redisConfig.Password)
 
 	filePath := filepath.Join(global.ConfigDir, "config.xml")
-	config := global.Config{}
+	config, _ := ReadConfigFromFile(filePath)
 	config.RedisConfig = redisConfig
 	if err := WriteConfigToFile(filePath, config); err != nil {
 		log.Println("[FeasOJ] Error saving Redis config: ", err)
@@ -119,7 +119,7 @@ func InputMailConfig() {
 	mailConfig.Port = 465
 
 	filePath := filepath.Join(global.ConfigDir, "config.xml")
-	config := global.Config{}
+	config, _ := ReadConfigFromFile(filePath)
 	config.MailConfig = mailConfig
 	if err := WriteConfigToFile(filePath, config); err != nil {
 		log.Println("[FeasOJ] Error saving email config:", err)
