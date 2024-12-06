@@ -163,7 +163,7 @@ func GetCompetitionListAdmin(c *gin.Context) {
 		c.JSON(http.StatusForbidden, gin.H{"message": "permission denied"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"status": 200, "contests": sql.SelectCompetitionInfoAdmin()})
+	c.JSON(http.StatusOK, gin.H{"contests": sql.SelectCompetitionInfoAdmin()})
 }
 
 // 管理员获取指定竞赛ID信息
@@ -176,7 +176,7 @@ func GetCompetitionInfoAdmin(c *gin.Context) {
 		c.JSON(http.StatusForbidden, gin.H{"message": "permission denied"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"status": 200, "contest": sql.SelectCompetitionInfoAdminByCid(cidInt)})
+	c.JSON(http.StatusOK, gin.H{"contest": sql.SelectCompetitionInfoAdminByCid(cidInt)})
 }
 
 // 删除指定ID竞赛

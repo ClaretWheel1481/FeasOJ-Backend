@@ -87,6 +87,13 @@ func UpdatePassword(email, newpassword string) bool {
 	return err == nil
 }
 
+// 根据uid获取用户信息
+func SelectUserByUid(uid int) global.User {
+	var user global.User
+	utils.ConnectSql().Where("uid = ?", uid).First(&user)
+	return user
+}
+
 // 根据username查询指定用户的除了password和tokensecret之外的所有信息
 func SelectUserInfo(username string) global.UserInfoRequest {
 	var user global.UserInfoRequest

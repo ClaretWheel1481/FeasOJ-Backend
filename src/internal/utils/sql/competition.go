@@ -3,6 +3,7 @@ package sql
 import (
 	"src/internal/global"
 	"src/internal/utils"
+	"time"
 )
 
 // 用户获取竞赛信息
@@ -35,6 +36,33 @@ func DeleteCompetition(Cid int) bool {
 // 管理员更新/添加竞赛
 func UpdateCompetition(req global.AdminCompetitionInfoRequest) error {
 	if err := utils.ConnectSql().Table("competitions").Where("contest_id = ?", req.ContestID).Save(&req).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+// 将用户添加至用户-竞赛表
+func AddUserCompetition(userId int, competitionId int) error {
+	var userInfo global.User
+	utils.ConnectSql().Table("users").Where("uid = ?", userId).Find(&userInfo)
+	// 当前时间
+	nowDateTime := time.Now()
+	if err := utils.ConnectSql().Table("user_competitions").Create(
+		&global.UserCompetitions{ContestID: competitionId, Uid: userId, Username: userInfo.Username, Join_date: nowDateTime}).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+// 查询用户是否参加竞赛
+func SelectUserCompetition(userId int, competitionId int) bool {
+	var userCompetition global.UserCompetitions
+	return utils.ConnectSql().Table("user_competitions").Where("uid = ? AND contest_id = ?", userId, competitionId).Find(&userCompetition) != nil
+}
+
+// 将用户从用户-竞赛表删除
+func DeleteUserCompetition(userId int, competitionId int) error {
+	if err := utils.ConnectSql().Table("user_competitions").Where("uid = ? AND contest_id = ?", userId, competitionId).Delete(&global.UserCompetitions{}).Error; err != nil {
 		return err
 	}
 	return nil
