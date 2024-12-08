@@ -15,7 +15,7 @@ func GetCompetitionList(c *gin.Context) {
 
 // 用户加入竞赛
 func JoinCompetition(c *gin.Context) {
-	uid := c.Param("uid")
+	uid := c.GetHeader("uid")
 	uidInt, _ := strconv.Atoi(uid)
 	competitionId := c.Param("cid")
 	competitionIdInt, _ := strconv.Atoi(competitionId)
@@ -28,7 +28,7 @@ func JoinCompetition(c *gin.Context) {
 
 // 查询用户是否在竞赛中
 func IsInCompetition(c *gin.Context) {
-	uid := c.Param("uid")
+	uid := c.GetHeader("uid")
 	uidInt, _ := strconv.Atoi(uid)
 	competitionId := c.Param("cid")
 	competitionIdInt, _ := strconv.Atoi(competitionId)
@@ -39,9 +39,16 @@ func IsInCompetition(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Success", "isIn": false})
 }
 
+// 查询指定竞赛中的所有参与用户
+func GetCompetitionUsers(c *gin.Context) {
+	competitionId := c.Param("cid")
+	competitionIdInt, _ := strconv.Atoi(competitionId)
+	c.JSON(http.StatusOK, gin.H{"data": sql.SelectUsersCompetition(competitionIdInt)})
+}
+
 // 用户退出竞赛
 func QuitCompetition(c *gin.Context) {
-	uid := c.Param("uid")
+	uid := c.GetHeader("uid")
 	uidInt, _ := strconv.Atoi(uid)
 	competitionId := c.Param("cid")
 	competitionIdInt, _ := strconv.Atoi(competitionId)

@@ -54,10 +54,18 @@ func AddUserCompetition(userId int, competitionId int) error {
 	return nil
 }
 
-// 查询用户是否参加竞赛
+// 查询指定竞赛参加的所有用户
+func SelectUsersCompetition(competitionId int) []global.UserCompetitions {
+	var users []global.UserCompetitions
+	utils.ConnectSql().Table("user_competitions").Where("contest_id = ?", competitionId).Find(&users)
+	return users
+}
+
+// 查询用户是否在指定竞赛中
 func SelectUserCompetition(userId int, competitionId int) bool {
 	var userCompetition global.UserCompetitions
-	return utils.ConnectSql().Table("user_competitions").Where("uid = ? AND contest_id = ?", userId, competitionId).Find(&userCompetition) != nil
+	utils.ConnectSql().Table("user_competitions").Where("uid = ? AND contest_id = ?", userId, competitionId).Find(&userCompetition)
+	return userCompetition.Uid != 0
 }
 
 // 将用户从用户-竞赛表删除
