@@ -11,6 +11,7 @@ FeasOJ is an online programming practice platform based on Vue and Golang, aimin
 <br>
 [FeasOJ-Frontend](https://github.com/ClaretWheel1481/FeasOJ)
 [ImageGuard](https://github.com/ClaretWheel1481/ImageGuard)
+[API Document](https://claret-feasoj.apifox.cn)
 
 ### Project Structure
 ```
