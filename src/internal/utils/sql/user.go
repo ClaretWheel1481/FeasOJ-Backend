@@ -109,3 +109,10 @@ func SelectAdminUser(role int) bool {
 	err := utils.ConnectSql().Where("role = ?", role).First(&user).Error
 	return err == nil
 }
+
+// 获取管理员数量
+func SelectAdminCount() int64 {
+	var count int64
+	utils.ConnectSql().Table("users").Where("role = ?", 1).Count(&count)
+	return count
+}

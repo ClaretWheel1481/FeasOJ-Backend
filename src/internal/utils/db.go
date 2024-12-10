@@ -57,7 +57,6 @@ func ConnectSql() *gorm.DB {
 		return nil
 	}
 
-	// TODO:自行设置连接池避免数据库连接过多导致的性能问题
 	sqlDB.SetMaxIdleConns(10)
 	sqlDB.SetMaxOpenConns(100)
 	sqlDB.SetConnMaxLifetime(time.Second * 6)

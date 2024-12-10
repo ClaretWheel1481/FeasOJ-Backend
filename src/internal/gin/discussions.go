@@ -23,7 +23,8 @@ func GetAllDiscussions(c *gin.Context) {
 
 // 获取指定id讨论信息
 func GetDiscussionByDid(c *gin.Context) {
-	discussion := sql.SelectDiscussionByDid(c.Param("Did"))
+	did, _ := strconv.Atoi(c.Param("did"))
+	discussion := sql.SelectDiscussionByDid(did)
 	c.JSON(http.StatusOK, gin.H{"discussionInfo": discussion})
 }
 
@@ -43,8 +44,8 @@ func CreateDiscussion(c *gin.Context) {
 
 // 删除讨论
 func DeleteDiscussion(c *gin.Context) {
-	Did := c.Param("Did")
-	if sql.DelDiscussion(Did) {
+	did, _ := strconv.Atoi(c.Param("did"))
+	if sql.DelDiscussion(did) {
 		c.JSON(http.StatusOK, gin.H{"message": "success"})
 	} else {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "internal server error"})
@@ -53,17 +54,15 @@ func DeleteDiscussion(c *gin.Context) {
 
 // 获取指定讨论的评论
 func GetComment(c *gin.Context) {
-	Did := c.Param("Did")
-	DidInt, _ := strconv.Atoi(Did)
-	comments := sql.SelectCommentsByDid(DidInt)
+	did, _ := strconv.Atoi(c.Param("did"))
+	comments := sql.SelectCommentsByDid(did)
 	c.JSON(http.StatusOK, gin.H{"comments": comments})
 }
 
 // 删除指定Cid的评论
 func DelComment(c *gin.Context) {
-	Cid := c.Param("Cid")
-	CidInt, _ := strconv.Atoi(Cid)
-	if !sql.DeleteCommentByCid(CidInt) {
+	cid, _ := strconv.Atoi(c.Param("cid"))
+	if !sql.DeleteCommentByCid(cid) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "failed"})
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "success"})
@@ -74,11 +73,10 @@ func AddComment(c *gin.Context) {
 	encodedUsername := c.GetHeader("username")
 	username, _ := url.QueryUnescape(encodedUsername)
 	content := c.PostForm("content")
-	Did := c.Param("Did")
-	DidInt, _ := strconv.Atoi(Did)
+	did, _ := strconv.Atoi(c.Param("did"))
 	// 获取用户ID
 	userInfo := sql.SelectUserInfo(username)
-	if !sql.AddComment(content, DidInt, userInfo.Uid) {
+	if !sql.AddComment(content, did, userInfo.Uid) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "failed"})
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "success"})

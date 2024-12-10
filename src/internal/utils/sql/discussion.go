@@ -23,7 +23,7 @@ func SelectDiscussList(page int, itemsPerPage int) ([]global.DiscussRequest, int
 }
 
 // 获取指定Did讨论及User表中发帖人的头像
-func SelectDiscussionByDid(Did string) global.DiscsInfoRequest {
+func SelectDiscussionByDid(Did int) global.DiscsInfoRequest {
 	var discussion global.DiscsInfoRequest
 	utils.ConnectSql().Table("Discussions").
 		Select("Discussions.Did, Discussions.Title, Discussions.Content, Discussions.Create_at, Users.Uid,Users.Username, Users.Avatar").
@@ -42,7 +42,7 @@ func AddDiscussion(title, content string, uid int) bool {
 }
 
 // 删除讨论
-func DelDiscussion(Did string) bool {
+func DelDiscussion(Did int) bool {
 	err := utils.ConnectSql().Table("Discussions").Where("Did = ?", Did).Delete(&global.Discussion{}).Error
 	return err == nil
 }

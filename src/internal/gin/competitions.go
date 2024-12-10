@@ -2,6 +2,7 @@ package gincontext
 
 import (
 	"net/http"
+	"net/url"
 	"src/internal/utils/sql"
 	"strconv"
 
@@ -15,11 +16,12 @@ func GetCompetitionList(c *gin.Context) {
 
 // 用户加入竞赛
 func JoinCompetition(c *gin.Context) {
-	uid := c.GetHeader("uid")
-	uidInt, _ := strconv.Atoi(uid)
+	encodedUsername := c.GetHeader("username")
+	username, _ := url.QueryUnescape(encodedUsername)
 	competitionId := c.Param("cid")
 	competitionIdInt, _ := strconv.Atoi(competitionId)
-	if sql.AddUserCompetition(uidInt, competitionIdInt) == nil {
+	uid := sql.SelectUserInfo(username).Uid
+	if sql.AddUserCompetition(uid, competitionIdInt) == nil {
 		c.JSON(http.StatusOK, gin.H{"message": "Success"})
 		return
 	}
@@ -28,11 +30,12 @@ func JoinCompetition(c *gin.Context) {
 
 // 查询用户是否在竞赛中
 func IsInCompetition(c *gin.Context) {
-	uid := c.GetHeader("uid")
-	uidInt, _ := strconv.Atoi(uid)
+	encodedUsername := c.GetHeader("username")
+	username, _ := url.QueryUnescape(encodedUsername)
 	competitionId := c.Param("cid")
 	competitionIdInt, _ := strconv.Atoi(competitionId)
-	if sql.SelectUserCompetition(uidInt, competitionIdInt) {
+	uid := sql.SelectUserInfo(username).Uid
+	if sql.SelectUserCompetition(uid, competitionIdInt) {
 		c.JSON(http.StatusOK, gin.H{"message": "Success", "isIn": true})
 		return
 	}
@@ -43,16 +46,17 @@ func IsInCompetition(c *gin.Context) {
 func GetCompetitionUsers(c *gin.Context) {
 	competitionId := c.Param("cid")
 	competitionIdInt, _ := strconv.Atoi(competitionId)
-	c.JSON(http.StatusOK, gin.H{"data": sql.SelectUsersCompetition(competitionIdInt)})
+	c.JSON(http.StatusOK, gin.H{"users": sql.SelectUsersCompetition(competitionIdInt)})
 }
 
 // 用户退出竞赛
 func QuitCompetition(c *gin.Context) {
-	uid := c.GetHeader("uid")
-	uidInt, _ := strconv.Atoi(uid)
+	encodedUsername := c.GetHeader("username")
+	username, _ := url.QueryUnescape(encodedUsername)
 	competitionId := c.Param("cid")
 	competitionIdInt, _ := strconv.Atoi(competitionId)
-	if sql.DeleteUserCompetition(uidInt, competitionIdInt) == nil {
+	uid := sql.SelectUserInfo(username).Uid
+	if sql.DeleteUserCompetition(uid, competitionIdInt) == nil {
 		c.JSON(http.StatusOK, gin.H{"message": "Success"})
 		return
 	}

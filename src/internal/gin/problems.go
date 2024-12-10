@@ -28,7 +28,7 @@ func GetProblemInfo(c *gin.Context) {
 
 // 上传代码
 func UploadCode(c *gin.Context) {
-	problem := c.Query("problem")
+	problem := c.Param("pid")
 	pidInt, _ := strconv.Atoi(problem)
 	encodedUsername := c.GetHeader("username")
 	username, _ := url.QueryUnescape(encodedUsername)

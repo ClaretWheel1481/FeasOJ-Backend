@@ -38,7 +38,7 @@ func main() {
 	// 遍历map，设置路径并创建不存在的目录
 	for name, dir := range dirs {
 		// TODO: 每次编译前需要修改为CurrentDir，debug时用ParentDir
-		*dir = filepath.Join(global.CurrentDir, name)
+		*dir = filepath.Join(global.ParentDir, name)
 		if _, err := os.Stat(*dir); os.IsNotExist(err) {
 			os.Mkdir(*dir, os.ModePerm)
 		}
