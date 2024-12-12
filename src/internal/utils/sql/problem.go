@@ -23,8 +23,18 @@ func SelectAllProblemsAdmin() []global.Problem {
 
 // 获取指定PID的题目除了Input_full_path Output_full_path外的所有信息
 func SelectProblemInfo(pid string) global.ProblemInfoRequest {
+	var problemall global.Problem
 	var problem global.ProblemInfoRequest
-	utils.ConnectSql().Table("Problems").Where("pid = ? AND is_visible = ?", pid, true).First(&problem)
+	utils.ConnectSql().Table("problems").Where("pid = ? AND is_visible = ?", pid, true).First(&problemall)
+	problem = global.ProblemInfoRequest{
+		Pid:         problemall.Pid,
+		Difficulty:  problemall.Difficulty,
+		Title:       problemall.Title,
+		Content:     problemall.Content,
+		Timelimit:   problemall.Timelimit,
+		Memorylimit: problemall.Memorylimit,
+		Input:       problemall.Input,
+	}
 	return problem
 }
 

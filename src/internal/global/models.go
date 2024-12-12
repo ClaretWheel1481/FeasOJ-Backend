@@ -99,8 +99,8 @@ type ProblemInfoRequest struct {
 	Difficulty  string `json:"difficulty"`
 	Title       string `json:"title"`
 	Content     string `json:"content"`
-	Timelimit   int    `json:"time_limit"`
-	Memorylimit int    `json:"memory_limit"`
+	Timelimit   string `json:"time_limit"`
+	Memorylimit string `json:"memory_limit"`
 	Input       string `json:"input"`
 	Output      string `json:"output"`
 	ContestID   int    `json:"contest_id"`
