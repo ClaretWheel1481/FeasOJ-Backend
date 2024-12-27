@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"encoding/json"
 	"src/config"
+	"time"
 
 	"github.com/go-redis/redis"
 )
@@ -15,4 +17,29 @@ func ConnectRedis() *redis.Client {
 		DB:       0,
 	})
 	return rdb
+}
+
+// 数据缓存
+func SetCache(key string, value interface{}, expiration time.Duration) error {
+	jsonData, err := json.Marshal(value)
+	if err != nil {
+		return err
+	}
+	return ConnectRedis().Set(key, jsonData, expiration).Err()
+}
+
+// 获取缓存
+func GetCache(key string, dest interface{}) error {
+	val, err := ConnectRedis().Get(key).Result()
+	if err == redis.Nil {
+		return nil // 缓存未命中
+	} else if err != nil {
+		return err
+	}
+	return json.Unmarshal([]byte(val), dest)
+}
+
+// 删除缓存
+func DeleteCache(key string) error {
+	return ConnectRedis().Del(key).Err()
 }

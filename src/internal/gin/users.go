@@ -114,7 +114,7 @@ func VerifyUserInfo(c *gin.Context) {
 	if userInfo.Username == "" {
 		c.JSON(http.StatusNotFound, gin.H{"message": "user not found"})
 	} else {
-		c.JSON(http.StatusOK, gin.H{"Info": userInfo})
+		c.JSON(http.StatusOK, gin.H{"info": userInfo})
 	}
 }
 
@@ -127,7 +127,7 @@ func GetUserInfo(c *gin.Context) {
 	if userInfo.Username == "" {
 		c.JSON(http.StatusNotFound, gin.H{"message": "user not found"})
 	} else {
-		c.JSON(http.StatusOK, gin.H{"Info": userInfo})
+		c.JSON(http.StatusOK, gin.H{"info": userInfo})
 	}
 }
 

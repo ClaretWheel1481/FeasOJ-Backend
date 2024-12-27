@@ -8,9 +8,9 @@ import (
 )
 
 func LoadRouter(r *gin.Engine) *gin.RouterGroup {
+	r.Use(middlewares.Logger())
 	// 设置路由组
 	router1 := r.Group("/api/v1")
-	router1.Use(middlewares.Logger())
 	{
 		// 注册
 		router1.POST("/register", gincontext.Register)
@@ -32,106 +32,109 @@ func LoadRouter(r *gin.Engine) *gin.RouterGroup {
 
 		// 获取竞赛参与的用户列表
 		router1.GET("/competitions/:cid/users", gincontext.GetCompetitionUsers)
+	}
 
-		router1.Use(middlewares.HeaderVerify())
-		{
-			// 验证用户信息
-			router1.GET("/verify", gincontext.VerifyUserInfo)
+	authGroup := router1.Group("")
+	authGroup.Use(middlewares.HeaderVerify())
+	{
+		// 验证用户信息
+		authGroup.GET("/verify", gincontext.VerifyUserInfo)
 
-			// 获取指定帖子的评论
-			router1.GET("/discussions/comments/:did", gincontext.GetComment)
+		// 获取指定帖子的评论
+		authGroup.GET("/discussions/comments/:did", gincontext.GetComment)
 
-			// 获取竞赛列表
-			router1.GET("/competitions", gincontext.GetCompetitionList)
+		// 获取竞赛列表
+		authGroup.GET("/competitions", gincontext.GetCompetitionList)
 
-			// 获取用户是否在竞赛中
-			router1.GET("/competitions/:cid/in", gincontext.IsInCompetition)
+		// 获取用户是否在竞赛中
+		authGroup.GET("/competitions/:cid/in", gincontext.IsInCompetition)
 
-			// 获取所有题目
-			router1.GET("/problems", gincontext.GetAllProblems)
+		// 获取所有题目
+		authGroup.GET("/problems", gincontext.GetAllProblems)
 
-			// 获取所有讨论帖子
-			router1.GET("/discussions", gincontext.GetAllDiscussions)
+		// 获取所有讨论帖子
+		authGroup.GET("/discussions", gincontext.GetAllDiscussions)
 
-			// 根据题目ID获取题目信息
-			router1.GET("/problems/:id", gincontext.GetProblemInfo)
+		// 根据题目ID获取题目信息
+		authGroup.GET("/problems/:id", gincontext.GetProblemInfo)
 
-			// 获取总提交记录
-			router1.GET("/submitrecords", gincontext.GetAllSubmitRecords)
+		// 获取总提交记录
+		authGroup.GET("/submitrecords", gincontext.GetAllSubmitRecords)
 
-			// 获取指定帖子
-			router1.GET("/discussions/:did", gincontext.GetDiscussionByDid)
+		// 获取指定帖子
+		authGroup.GET("/discussions/:did", gincontext.GetDiscussionByDid)
 
-			// 上传代码
-			router1.POST("/problems/:pid/code", gincontext.UploadCode)
+		// 上传代码
+		authGroup.POST("/problems/:pid/code", gincontext.UploadCode)
 
-			// 创建讨论
-			router1.POST("/discussions", gincontext.CreateDiscussion)
+		// 创建讨论
+		authGroup.POST("/discussions", gincontext.CreateDiscussion)
 
-			// 添加评论
-			router1.POST("/discussions/comments/:did", gincontext.AddComment)
+		// 添加评论
+		authGroup.POST("/discussions/comments/:did", gincontext.AddComment)
 
-			// 加入竞赛
-			router1.POST("/competitions/join/:cid", gincontext.JoinCompetition)
+		// 加入竞赛
+		authGroup.POST("/competitions/join/:cid", gincontext.JoinCompetition)
 
-			// 退出竞赛
-			router1.POST("/competitions/quit/:cid", gincontext.QuitCompetition)
+		// 退出竞赛
+		authGroup.POST("/competitions/quit/:cid", gincontext.QuitCompetition)
 
-			// 用户上传头像
-			router1.PUT("/users/avatar", gincontext.UploadAvatar)
+		// 用户上传头像
+		authGroup.PUT("/users/avatar", gincontext.UploadAvatar)
 
-			// 简介更新
-			router1.PUT("/users/synopsis", gincontext.UpdateSynopsis)
+		// 简介更新
+		authGroup.PUT("/users/synopsis", gincontext.UpdateSynopsis)
 
-			// 删除讨论
-			router1.DELETE("/discussions/:did", gincontext.DeleteDiscussion)
+		// 删除讨论
+		authGroup.DELETE("/discussions/:did", gincontext.DeleteDiscussion)
 
-			// 删除评论
-			router1.DELETE("/discussions/comments/:cid", gincontext.DelComment)
+		// 删除评论
+		authGroup.DELETE("/discussions/comments/:cid", gincontext.DelComment)
 
-			// 管理员权限检查
-			router1.Use(middlewares.PermissionChecker())
-			{
-				// 管理员晋升用户
-				router1.PUT("/admin/users/promote", gincontext.PromoteUser)
+	}
 
-				// 管理员降级用户
-				router1.PUT("/admin/users/demote", gincontext.DemoteUser)
+	adminGroup := authGroup.Group("/admin")
+	// 管理员权限检查
+	adminGroup.Use(middlewares.PermissionChecker())
+	{
+		// 管理员晋升用户
+		adminGroup.PUT("/users/promote", gincontext.PromoteUser)
 
-				// 管理员封禁用户
-				router1.PUT("/admin/users/ban", gincontext.BanUser)
+		// 管理员降级用户
+		adminGroup.PUT("/users/demote", gincontext.DemoteUser)
 
-				// 管理员解封用户
-				router1.PUT("/admin/users/unban", gincontext.UnbanUser)
+		// 管理员封禁用户
+		adminGroup.PUT("/users/ban", gincontext.BanUser)
 
-				// 管理员获取竞赛列表
-				router1.GET("/admin/competitions", gincontext.GetCompetitionListAdmin)
+		// 管理员解封用户
+		adminGroup.PUT("/users/unban", gincontext.UnbanUser)
 
-				// 管理员获取所有题目
-				router1.GET("/admin/problems", gincontext.GetAllProblemsAdmin)
+		// 管理员获取竞赛列表
+		adminGroup.GET("/competitions", gincontext.GetCompetitionListAdmin)
 
-				// 管理员获取指定竞赛ID信息
-				router1.GET("/admin/competitions/:cid", gincontext.GetCompetitionInfoAdmin)
+		// 管理员获取所有题目
+		adminGroup.GET("/problems", gincontext.GetAllProblemsAdmin)
 
-				// 管理员获取指定题目的所有信息
-				router1.GET("/admin/problems/:pid", gincontext.GetProblemAllInfo)
+		// 管理员获取指定竞赛ID信息
+		adminGroup.GET("/competitions/:cid", gincontext.GetCompetitionInfoAdmin)
 
-				// 管理员获取所有用户信息
-				router1.GET("/admin/users", gincontext.GetAllUsersInfo)
+		// 管理员获取指定题目的所有信息
+		adminGroup.GET("/problems/:pid", gincontext.GetProblemAllInfo)
 
-				// 管理员新增/更新题目信息
-				router1.POST("/admin/problems", gincontext.UpdateProblemInfo)
+		// 管理员获取所有用户信息
+		adminGroup.GET("/users", gincontext.GetAllUsersInfo)
 
-				// 管理员新增/更新竞赛信息
-				router1.POST("/admin/competitions", gincontext.UpdateCompetitionInfo)
+		// 管理员新增/更新题目信息
+		adminGroup.POST("/problems", gincontext.UpdateProblemInfo)
 
-				// 管理员删除题目
-				router1.DELETE("/admin/problems/:pid", gincontext.DeleteProblem)
+		// 管理员新增/更新竞赛信息
+		adminGroup.POST("/competitions", gincontext.UpdateCompetitionInfo)
 
-				// 管理员删除竞赛
-				router1.DELETE("/admin/competitions/:cid", gincontext.DeleteCompetition)
-			}
-		}
+		// 管理员删除题目
+		adminGroup.DELETE("/problems/:pid", gincontext.DeleteProblem)
+
+		// 管理员删除竞赛
+		adminGroup.DELETE("/competitions/:cid", gincontext.DeleteCompetition)
 	}
 	return router1
 }

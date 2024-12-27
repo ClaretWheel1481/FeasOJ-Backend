@@ -71,8 +71,17 @@ func main() {
 	// 测试邮箱模块是否正常
 	if !utils.TestSend(config.InitEmailConfig()) {
 		log.Println("[FeasOJ] Email service startup failed, please check the configuration.")
+		return
 	} else {
 		log.Println("[FeasOJ] Email service initialization complete.")
+	}
+
+	// 测试Redis连接
+	if utils.ConnectRedis() == nil {
+		log.Println("[FeasOJ] Redis connection failed, please check the configuration.")
+		return
+	} else {
+		log.Println("[FeasOJ] Redis connection successful.")
 	}
 
 	// 构建沙盒镜像

@@ -10,19 +10,41 @@ import (
 	"src/internal/utils"
 	"src/internal/utils/sql"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 // 获取所有题目
 func GetAllProblems(c *gin.Context) {
+	// 实时性要求较高，不做数据缓存
 	problems := sql.SelectAllProblems()
 	c.JSON(http.StatusOK, gin.H{"problems": problems})
 }
 
 // 获取题目信息
 func GetProblemInfo(c *gin.Context) {
-	problemInfo := sql.SelectProblemInfo(c.Param("id"))
+	// 生成缓存键
+	cacheKey := "problemInfo_" + c.Param("id")
+	var problemInfo global.ProblemInfoRequest
+
+	// 从缓存中获取数据
+	err := utils.GetCache(cacheKey, &problemInfo)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get cache"})
+		return
+	}
+	if problemInfo.Pid == 0 {
+		// 缓存未命中
+		problemInfo = sql.SelectProblemInfo(c.Param("id"))
+		// 数据存入缓存，时间10分钟
+		err = utils.SetCache(cacheKey, problemInfo, 10*time.Minute)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to set cache"})
+			return
+		}
+
+	}
 	c.JSON(http.StatusOK, gin.H{"problemInfo": problemInfo})
 }
 
