@@ -38,4 +38,4 @@ func CompressImage(inputPath, outputPath string) error {
 	return err
 }
 
-// TODO: 接入本地模型判断图片是否违规
+// TODO: 判断图片是否违规

@@ -11,3 +11,6 @@ var CertDir string
 
 // 全局变量 - 容器ID
 var ContainerID string
+
+// 后端模式
+const DebugMode = true

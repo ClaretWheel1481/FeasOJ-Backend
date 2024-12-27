@@ -37,8 +37,13 @@ func main() {
 
 	// 遍历map，设置路径并创建不存在的目录
 	for name, dir := range dirs {
-		// TODO: 每次编译前需要修改为CurrentDir，debug时用ParentDir
-		*dir = filepath.Join(global.ParentDir, name)
+		var mainDir string
+		if global.DebugMode {
+			mainDir = global.ParentDir
+		} else {
+			mainDir = global.CurrentDir
+		}
+		*dir = filepath.Join(mainDir, name)
 		if _, err := os.Stat(*dir); os.IsNotExist(err) {
 			os.Mkdir(*dir, os.ModePerm)
 		}
@@ -121,7 +126,7 @@ func main() {
 		}
 	}
 	// TODO: 根据需求调整
-	// go startServer("https", "127.0.0.1:37881", "./certificate/fullchain.pem", "./certificate/privkey.pem")
+	// go startServer("https", "127.0.0.1:37881", "./certificate/fullchain.pem", "./certificate/privkey.key")
 	go startServer("http", "127.0.0.1:37881", "", "")
 
 	log.Println("[FeasOJ] Server activated.")

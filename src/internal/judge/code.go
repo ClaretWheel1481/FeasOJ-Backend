@@ -1,5 +1,3 @@
-// TODO: 分离Judge服务
-
 package judge
 
 import (
@@ -25,7 +23,7 @@ func ProcessJudgeTasks(rdb *redis.Client) {
 			log.Panic(err)
 			continue
 		}
-
+		// TODO: 实现当任务较多时，Sandbox的并发处理
 		// 执行任务
 		StartContainer()
 		str := CompileAndRun(task)
