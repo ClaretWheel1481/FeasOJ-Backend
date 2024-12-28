@@ -14,6 +14,7 @@ import (
 	"src/internal/judge"
 	"src/internal/router"
 	"src/internal/utils"
+	"src/internal/utils/schedule"
 	"src/internal/utils/sql"
 
 	"syscall"
@@ -96,6 +97,9 @@ func main() {
 		log.Println("[FeasOJ] SandBox builds fail, please make sure Docker is running and up to date!")
 		return
 	}
+
+	// 启用竞赛状态调度器
+	go schedule.ScheduleCompetitionStatus()
 
 	// 启动服务器
 	gin.SetMode(gin.ReleaseMode)

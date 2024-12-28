@@ -75,3 +75,16 @@ func DeleteUserCompetition(userId int, competitionId int) error {
 	}
 	return nil
 }
+
+// 竞赛状态更新
+func UpdateCompetitionStatus() error {
+	now := time.Now()
+	if err := utils.ConnectSql().Table("competitions").Where("start_at <= ? AND end_at >= ?", now, now).Update("enable", true).Error; err != nil {
+		return err
+	}
+	if err := utils.ConnectSql().Table("competitions").Where("end_at < ?", now).
+		Update("enable", false).Error; err != nil {
+		return err
+	}
+	return nil
+}

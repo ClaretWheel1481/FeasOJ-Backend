@@ -217,7 +217,7 @@ type TestCase struct {
 	OutputData string `gorm:"comment:输出数据;not null"`
 }
 
-// 竞赛表：ContestID, Title, Subtitle, Difficulty, Password, HavePassword, IsVisible, Start_at, End_at
+// 竞赛表：ContestID, Title, Subtitle, Difficulty, Password, HavePassword, IsVisible, Enable, Start_at, End_at
 type Competition struct {
 	ContestID    int       `gorm:"comment:比赛ID;primaryKey;autoIncrement"`
 	Title        string    `gorm:"comment:标题;not null"`
@@ -226,6 +226,7 @@ type Competition struct {
 	Password     string    `gorm:"comment:密码;"`
 	HavePassword bool      `gorm:"comment:是否有密码;not null"`
 	IsVisible    bool      `gorm:"comment:是否可见;not null"`
+	Enable       bool      `gorm:"comment:是否可用;not null"`
 	Start_at     time.Time `gorm:"comment:开始时间;not null"`
 	End_at       time.Time `gorm:"comment:结束时间;not null"`
 }
