@@ -12,11 +12,16 @@ func ScheduleCompetitionStatus() {
 	// 启动任务调度
 	scheduler := gocron.NewScheduler(time.Local)
 
-	// 每分钟执行一次任务
-	scheduler.Every(1).Minute().Do(func() {
-		log.Println(sql.UpdateCompetitionStatus())
-	})
+	now := time.Now()
+	delay := time.Minute - time.Duration(now.Second())*time.Second
 
-	// 开始任务调度
-	scheduler.StartBlocking()
+	// 调整至每分钟的0秒
+	time.AfterFunc(delay, func() {
+		scheduler.Every(1).Minute().Do(func() {
+			log.Println("[FeasOJ] Competition Status Update:", time.Now(), "Status:", sql.UpdateCompetitionStatus())
+		})
+
+		// 启动任务调度
+		scheduler.StartBlocking()
+	})
 }

@@ -32,6 +32,9 @@ func LoadRouter(r *gin.Engine) *gin.RouterGroup {
 
 		// 获取竞赛参与的用户列表
 		router1.GET("/competitions/:cid/users", gincontext.GetCompetitionUsers)
+
+		// 通知
+		router1.GET("/events/:uid", gincontext.SSEHandler)
 	}
 
 	authGroup := router1.Group("")

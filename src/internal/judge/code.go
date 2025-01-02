@@ -1,7 +1,9 @@
 package judge
 
 import (
+	"fmt"
 	"log"
+	gincontext "src/internal/gin"
 	"src/internal/utils/sql"
 	"strconv"
 	"strings"
@@ -27,7 +29,7 @@ func ProcessJudgeTasks(rdb *redis.Client) {
 		// 执行任务
 		StartContainer()
 		str := CompileAndRun(task)
-		// 将结果从数据库中修改
+
 		parts := strings.Split(task, "_")
 		uid := parts[0]
 		pid := strings.Split(parts[1], ".")[0]
@@ -39,6 +41,13 @@ func ProcessJudgeTasks(rdb *redis.Client) {
 		if err != nil {
 			log.Panic(err)
 		}
+
+		// 将结果从数据库中修改
 		sql.ModifyJudgeStatus(uidInt, pidInt, str)
+
+		// 发送SSE通知
+		if ch, ok := gincontext.Clients[uid]; ok {
+			ch <- fmt.Sprintf("Problem %d 运行完毕。", pidInt)
+		}
 	}
 }
