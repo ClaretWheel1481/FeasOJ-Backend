@@ -35,7 +35,7 @@ func UpdateProblemInfo(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
+	c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 }
 
 // 删除题目及其输入输出样例
@@ -43,10 +43,10 @@ func DeleteProblem(c *gin.Context) {
 	pid := c.Param("pid")
 	pidInt, _ := strconv.Atoi(pid)
 	if !sql.DeleteProblemAllInfo(pidInt) {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "failed"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "failed")})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
+	c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 }
 
 // 管理员获取所有用户信息
@@ -61,10 +61,10 @@ func PromoteUser(c *gin.Context) {
 	uidInt, _ := strconv.Atoi(uid)
 
 	if !sql.PromoteToAdmin(uidInt) {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "failed"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "failed")})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
+	c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 }
 
 // 降级用户
@@ -73,15 +73,15 @@ func DemoteUser(c *gin.Context) {
 	uidInt, _ := strconv.Atoi(uid)
 
 	if sql.SelectAdminCount() <= 1 {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "failed"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "failed")})
 		return
 	}
 
 	if !sql.DemoteToUser(uidInt) {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "failed"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "failed")})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
+	c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 }
 
 // 封禁用户
@@ -90,10 +90,10 @@ func BanUser(c *gin.Context) {
 	uidInt, _ := strconv.Atoi(uid)
 
 	if !sql.BanUser(uidInt) {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "failed"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "failed")})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
+	c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 }
 
 // 解封用户
@@ -102,10 +102,10 @@ func UnbanUser(c *gin.Context) {
 	uidInt, _ := strconv.Atoi(uid)
 
 	if !sql.UnbanUser(uidInt) {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "failed"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "failed")})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
+	c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 }
 
 // 管理员获取竞赛列表
@@ -126,10 +126,10 @@ func DeleteCompetition(c *gin.Context) {
 	cidInt, _ := strconv.Atoi(cid)
 
 	if !sql.DeleteCompetition(cidInt) {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "failed"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "failed")})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
+	c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 }
 
 // 更新/添加竞赛信息
@@ -146,5 +146,5 @@ func UpdateCompetitionInfo(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
+	c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 }

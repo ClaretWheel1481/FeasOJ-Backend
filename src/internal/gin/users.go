@@ -32,9 +32,9 @@ func Register(c *gin.Context) {
 	}
 	regstatus := sql.Register(req.Username, utils.EncryptPassword(req.Password), req.Email, uuid.New().String(), 0)
 	if regstatus {
-		c.JSON(http.StatusOK, gin.H{"message": "success"})
+		c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 	} else {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "failed"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "failed")})
 	}
 }
 
@@ -65,7 +65,7 @@ func Login(c *gin.Context) {
 			if err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"message": "token generation failed"})
 			}
-			c.JSON(http.StatusOK, gin.H{"message": "success", "token": token})
+			c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "loginSuccess"), "token": token})
 		} else {
 			c.JSON(http.StatusBadRequest, gin.H{"message": "password error"})
 		}
@@ -89,7 +89,7 @@ func GetCaptcha(c *gin.Context) {
 		}
 	}
 	if utils.SendVerifycode(config.InitEmailConfig(), emails, utils.GenerateVerifycode()) {
-		c.JSON(http.StatusOK, gin.H{"message": "success"})
+		c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "failed, please try again"})
 	}
@@ -98,7 +98,7 @@ func GetCaptcha(c *gin.Context) {
 // 验证用户信息
 func VerifyUserInfo(c *gin.Context) {
 	var Username string
-	user := c.GetHeader("username")
+	user := c.GetHeader("Username")
 	unescapeUsername, err := url.QueryUnescape(user)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "can't get username"})
@@ -142,22 +142,22 @@ func UpdatePassword(c *gin.Context) {
 	}
 	newPassword := utils.EncryptPassword(req.NewPassword)
 	if sql.UpdatePassword(req.Email, newPassword) {
-		c.JSON(http.StatusOK, gin.H{"message": "success"})
+		c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 	} else {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "failed"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "failed")})
 	}
 }
 
 // 更新个人简介
 func UpdateSynopsis(c *gin.Context) {
 	synopsis := c.PostForm("synopsis")
-	encodedUsername := c.GetHeader("username")
+	encodedUsername := c.GetHeader("Username")
 	username, _ := url.QueryUnescape(encodedUsername)
 	// 更新简介
 	if sql.UpdateSynopsis(username, synopsis) {
-		c.JSON(http.StatusOK, gin.H{"message": "success"})
+		c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 	} else {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "failed"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "failed")})
 	}
 }
 
@@ -168,7 +168,7 @@ func UploadAvatar(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "can't get file"})
 		return
 	}
-	encodedUsername := c.GetHeader("username")
+	encodedUsername := c.GetHeader("Username")
 	username, _ := url.QueryUnescape(encodedUsername)
 	// 获取用户信息
 	userInfo := sql.SelectUserInfo(username)
@@ -197,5 +197,5 @@ func UploadAvatar(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "internal server error"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
+	c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 }

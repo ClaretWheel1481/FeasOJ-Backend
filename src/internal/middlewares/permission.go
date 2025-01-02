@@ -10,7 +10,7 @@ import (
 
 func PermissionChecker() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		encodedUsername := c.GetHeader("username")
+		encodedUsername := c.GetHeader("Username")
 		username, _ := url.QueryUnescape(encodedUsername)
 		if sql.SelectUserInfo(username).Role != 1 {
 			c.JSON(http.StatusForbidden, gin.H{"message": "permission denied"})

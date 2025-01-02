@@ -12,7 +12,7 @@ import (
 func HeaderVerify() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var User string
-		encodedUsername := c.GetHeader("username")
+		encodedUsername := c.GetHeader("Username")
 		username, err := url.QueryUnescape(encodedUsername)
 		token := c.GetHeader("Authorization")
 		if err != nil {

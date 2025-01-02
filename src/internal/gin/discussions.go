@@ -30,7 +30,7 @@ func GetDiscussionByDid(c *gin.Context) {
 
 // 创建讨论
 func CreateDiscussion(c *gin.Context) {
-	encodedUsername := c.GetHeader("username")
+	encodedUsername := c.GetHeader("Username")
 	username, _ := url.QueryUnescape(encodedUsername)
 	title := c.PostForm("title")
 	content := c.PostForm("content")
@@ -39,14 +39,14 @@ func CreateDiscussion(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "internal server error"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
+	c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 }
 
 // 删除讨论
 func DeleteDiscussion(c *gin.Context) {
 	did, _ := strconv.Atoi(c.Param("did"))
 	if sql.DelDiscussion(did) {
-		c.JSON(http.StatusOK, gin.H{"message": "success"})
+		c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 	} else {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "internal server error"})
 	}
@@ -63,21 +63,21 @@ func GetComment(c *gin.Context) {
 func DelComment(c *gin.Context) {
 	cid, _ := strconv.Atoi(c.Param("cid"))
 	if !sql.DeleteCommentByCid(cid) {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "failed"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "failed")})
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
+	c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 }
 
 // 添加评论
 func AddComment(c *gin.Context) {
-	encodedUsername := c.GetHeader("username")
+	encodedUsername := c.GetHeader("Username")
 	username, _ := url.QueryUnescape(encodedUsername)
 	content := c.PostForm("content")
 	did, _ := strconv.Atoi(c.Param("did"))
 	// 获取用户ID
 	userInfo := sql.SelectUserInfo(username)
 	if !sql.AddComment(content, did, userInfo.Uid) {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "failed"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "failed")})
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
+	c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 }

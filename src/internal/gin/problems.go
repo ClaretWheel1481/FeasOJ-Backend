@@ -52,7 +52,7 @@ func GetProblemInfo(c *gin.Context) {
 func UploadCode(c *gin.Context) {
 	problem := c.Param("pid")
 	pidInt, _ := strconv.Atoi(problem)
-	encodedUsername := c.GetHeader("username")
+	encodedUsername := c.GetHeader("Username")
 	username, _ := url.QueryUnescape(encodedUsername)
 	file, err := c.FormFile("code")
 	if err != nil {

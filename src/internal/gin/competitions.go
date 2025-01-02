@@ -16,30 +16,30 @@ func GetCompetitionList(c *gin.Context) {
 
 // 用户加入竞赛
 func JoinCompetition(c *gin.Context) {
-	encodedUsername := c.GetHeader("username")
+	encodedUsername := c.GetHeader("Username")
 	username, _ := url.QueryUnescape(encodedUsername)
 	competitionId := c.Param("cid")
 	competitionIdInt, _ := strconv.Atoi(competitionId)
 	uid := sql.SelectUserInfo(username).Uid
 	if sql.AddUserCompetition(uid, competitionIdInt) == nil {
-		c.JSON(http.StatusOK, gin.H{"message": "success"})
+		c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 		return
 	}
-	c.JSON(http.StatusBadRequest, gin.H{"message": "failed"})
+	c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "failed")})
 }
 
 // 查询用户是否在竞赛中
 func IsInCompetition(c *gin.Context) {
-	encodedUsername := c.GetHeader("username")
+	encodedUsername := c.GetHeader("Username")
 	username, _ := url.QueryUnescape(encodedUsername)
 	competitionId := c.Param("cid")
 	competitionIdInt, _ := strconv.Atoi(competitionId)
 	uid := sql.SelectUserInfo(username).Uid
 	if sql.SelectUserCompetition(uid, competitionIdInt) {
-		c.JSON(http.StatusOK, gin.H{"message": "success", "isIn": true})
+		c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success"), "isIn": true})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "success", "isIn": false})
+	c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success"), "isIn": false})
 }
 
 // 查询指定竞赛中的所有参与用户
@@ -51,14 +51,14 @@ func GetCompetitionUsers(c *gin.Context) {
 
 // 用户退出竞赛
 func QuitCompetition(c *gin.Context) {
-	encodedUsername := c.GetHeader("username")
+	encodedUsername := c.GetHeader("Username")
 	username, _ := url.QueryUnescape(encodedUsername)
 	competitionId := c.Param("cid")
 	competitionIdInt, _ := strconv.Atoi(competitionId)
 	uid := sql.SelectUserInfo(username).Uid
 	if sql.DeleteUserCompetition(uid, competitionIdInt) == nil {
-		c.JSON(http.StatusOK, gin.H{"message": "success"})
+		c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 		return
 	}
-	c.JSON(http.StatusBadRequest, gin.H{"message": "failed"})
+	c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "failed")})
 }
