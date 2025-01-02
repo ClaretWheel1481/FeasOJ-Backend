@@ -26,14 +26,16 @@ FeasOJ-Backend
 │  │  ├─middlewares
 │  │  ├─router
 │  │  └─utils
-│  │     └─sql
+│  │    ├─lang
+│  │    ├─schedule
+│  │    └─sql
 │  ├─go.mod
 │  └─main.go    # Main entry file
 └─Sandbox
 ```
 
 ### Environment
-- Golang 1.23.1
+- Golang 1.23.4
 - Redis
 - MySQL 8.0+
 - Docker
