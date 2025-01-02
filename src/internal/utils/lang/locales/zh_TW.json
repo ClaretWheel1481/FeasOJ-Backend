@@ -1,5 +1,11 @@
 {
-    "loginSuccess": "登錄成功！",
-    "success": "成功！",
-    "failed": "失敗！"
+  "loginSuccess": "登錄成功！",
+  "success": "成功！",
+  "failed": "失敗！",
+  "internalServerError": "內部伺服器錯誤",
+  "invalidrequest": "無效的請求",
+  "captchaError": "驗證碼錯誤",
+  "userAlreadyinUse": "用戶名或郵箱已經被使用。",
+  "userIsBanned": "用戶已被封鎖",
+  "wrongPassword": "密碼錯誤"
 }

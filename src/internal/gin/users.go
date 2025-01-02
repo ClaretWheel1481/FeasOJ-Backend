@@ -22,12 +22,12 @@ func Register(c *gin.Context) {
 	c.ShouldBind(&req)
 	// 判断用户或邮箱是否存在
 	if sql.IsUserExist(req.Username, req.Email) {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "user or email already exists"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "userAlreadyinUse")})
 		return
 	}
 	vcodeStatus := utils.CompareVerifyCode(req.Vcode, req.Email)
 	if !vcodeStatus {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "captcha verification failed"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "captchaError")})
 		return
 	}
 	regstatus := sql.Register(req.Username, utils.EncryptPassword(req.Password), req.Email, uuid.New().String(), 0)
@@ -51,11 +51,11 @@ func Login(c *gin.Context) {
 	}
 	userPassword := utils.SelectUser(Username).Password
 	if userPassword == "" {
-		c.JSON(http.StatusNotFound, gin.H{"message": "user not found"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
 	} else {
 		// 用户是否被封禁
 		if sql.SelectUserInfo(Username).IsBan {
-			c.JSON(http.StatusForbidden, gin.H{"message": "user is banned"})
+			c.JSON(http.StatusForbidden, gin.H{"message": GetMessage(c, "userIsBanned")})
 			return
 		}
 		// 校验密码是否正确
@@ -63,11 +63,11 @@ func Login(c *gin.Context) {
 			// 生成Token并返回至前端
 			token, err := utils.GenerateToken(Username)
 			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"message": "token generation failed"})
+				c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
 			}
 			c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "loginSuccess"), "token": token})
 		} else {
-			c.JSON(http.StatusBadRequest, gin.H{"message": "password error"})
+			c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "wrongPassword")})
 		}
 	}
 }
@@ -79,19 +79,19 @@ func GetCaptcha(c *gin.Context) {
 	isCreate := c.GetHeader("iscreate")
 	if isCreate == "false" {
 		if sql.SelectUserByEmail(emails).Username == "" {
-			c.JSON(http.StatusNotFound, gin.H{"message": "user not found"})
+			c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
 			return
 		}
 	} else {
 		if sql.SelectUserByEmail(emails).Username != "" {
-			c.JSON(http.StatusBadRequest, gin.H{"message": "user already exists"})
+			c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "userAlreadyinUse")})
 			return
 		}
 	}
 	if utils.SendVerifycode(config.InitEmailConfig(), emails, utils.GenerateVerifycode()) {
 		c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 	} else {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "failed, please try again"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
 	}
 }
 
@@ -101,7 +101,7 @@ func VerifyUserInfo(c *gin.Context) {
 	user := c.GetHeader("Username")
 	unescapeUsername, err := url.QueryUnescape(user)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "can't get username"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
 		return
 	}
 	if utils.IsEmail(unescapeUsername) {
@@ -112,7 +112,7 @@ func VerifyUserInfo(c *gin.Context) {
 	// 查询对应的用户信息
 	userInfo := sql.SelectUserInfo(Username)
 	if userInfo.Username == "" {
-		c.JSON(http.StatusNotFound, gin.H{"message": "user not found"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
 	} else {
 		c.JSON(http.StatusOK, gin.H{"info": userInfo})
 	}
@@ -125,7 +125,7 @@ func GetUserInfo(c *gin.Context) {
 	// 查询对应的用户信息
 	userInfo := sql.SelectUserInfo(username)
 	if userInfo.Username == "" {
-		c.JSON(http.StatusNotFound, gin.H{"message": "user not found"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
 	} else {
 		c.JSON(http.StatusOK, gin.H{"info": userInfo})
 	}
@@ -137,7 +137,7 @@ func UpdatePassword(c *gin.Context) {
 	c.ShouldBind(&req)
 	vcodeStatus := utils.CompareVerifyCode(req.Vcode, req.Email)
 	if !vcodeStatus {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "captcha verification failed"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "captchaError")})
 		return
 	}
 	newPassword := utils.EncryptPassword(req.NewPassword)
@@ -165,7 +165,7 @@ func UpdateSynopsis(c *gin.Context) {
 func UploadAvatar(c *gin.Context) {
 	file, err := c.FormFile("avatar")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "can't get file"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "invalidrequest")})
 		return
 	}
 	encodedUsername := c.GetHeader("Username")
@@ -173,7 +173,7 @@ func UploadAvatar(c *gin.Context) {
 	// 获取用户信息
 	userInfo := sql.SelectUserInfo(username)
 	if userInfo.Username == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "can't get user info"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "invalidrequest")})
 		return
 	}
 	newFilename := fmt.Sprintf("%d%s", userInfo.Uid, path.Ext(file.Filename))
@@ -184,7 +184,7 @@ func UploadAvatar(c *gin.Context) {
 	}
 	// 保存原始文件
 	if err := c.SaveUploadedFile(file, originalFilePath); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "internal server error"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
 		return
 	}
 	// 压缩图像
@@ -194,7 +194,7 @@ func UploadAvatar(c *gin.Context) {
 	}
 	// 上传压缩后的头像路径至数据库
 	if !sql.UpdateAvatar(username, newFilename) {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "internal server error"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})

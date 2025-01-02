@@ -1,5 +1,11 @@
 {
-    "loginSuccess": "ログインに成功しました！",
-    "success": "成功しました！",
-    "failed": "失敗しました！"
+  "loginSuccess": "ログインに成功しました！",
+  "success": "成功しました！",
+  "failed": "失敗しました！",
+  "internalServerError": "サーバーエラーが発生しました",
+  "invalidrequest": "無効なリクエストです",
+  "captchaError": "無効なキャプチャコードです",
+  "userAlreadyinUse": "すでに使用されているユーザー名またはEメール",
+  "userIsBanned": "このユーザーは禁止されています",
+  "wrongPassword": "パスワードが間違っています"
 }

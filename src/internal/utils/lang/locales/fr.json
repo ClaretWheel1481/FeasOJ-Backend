@@ -1,5 +1,11 @@
 {
-    "loginSuccess": "Connexion réussie!",
-    "success": "Succès!",
-    "failed": "Échec!"
+  "loginSuccess": "Connexion réussie!",
+  "success": "Succès!",
+  "failed": "Échec!",
+  "internalServerError": "Erreur interne du serveur",
+  "invalidrequest": "Requête invalide",
+  "captchaError": "Veuillez résoudre le captcha",
+  "userAlreadyinUse": "Nom d'utilisateur ou email déjà utilisé",
+  "userIsBanned": "Utilisateur banni",
+  "wrongPassword": "Mot de passe incorrect"
 }

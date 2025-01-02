@@ -31,7 +31,7 @@ func GetProblemInfo(c *gin.Context) {
 	// 从缓存中获取数据
 	err := utils.GetCache(cacheKey, &problemInfo)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get cache"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
 		return
 	}
 	if problemInfo.Pid == 0 {
@@ -40,7 +40,7 @@ func GetProblemInfo(c *gin.Context) {
 		// 数据存入缓存，时间10分钟
 		err = utils.SetCache(cacheKey, problemInfo, 10*time.Minute)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to set cache"})
+			c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
 			return
 		}
 
@@ -56,7 +56,7 @@ func UploadCode(c *gin.Context) {
 	username, _ := url.QueryUnescape(encodedUsername)
 	file, err := c.FormFile("code")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "can't get code file"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "invalidrequest")})
 		return
 	}
 	// 获取用户ID
@@ -85,9 +85,9 @@ func UploadCode(c *gin.Context) {
 	rdb := utils.ConnectRedis()
 	err = rdb.RPush("judgeTask", newFileName).Err()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "internal server error"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
 		return
 	}
 	sql.AddSubmitRecord(userInfo.Uid, pidInt, "Running...", language, username)
-	c.JSON(http.StatusOK, gin.H{"message": "success, please wait for a moment"})
+	c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 }

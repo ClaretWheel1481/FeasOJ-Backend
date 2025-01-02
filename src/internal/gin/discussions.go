@@ -36,7 +36,7 @@ func CreateDiscussion(c *gin.Context) {
 	content := c.PostForm("content")
 	uid := sql.SelectUserInfo(username).Uid
 	if !sql.AddDiscussion(title, content, uid) {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "internal server error"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
@@ -48,7 +48,7 @@ func DeleteDiscussion(c *gin.Context) {
 	if sql.DelDiscussion(did) {
 		c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 	} else {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "internal server error"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
 	}
 }
 

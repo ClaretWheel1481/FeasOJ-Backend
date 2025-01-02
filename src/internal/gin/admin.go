@@ -25,13 +25,13 @@ func GetProblemAllInfo(c *gin.Context) {
 func UpdateProblemInfo(c *gin.Context) {
 	var req global.AdminProblemInfoRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid request"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "invalidrequest")})
 		return
 	}
 
 	// 更新题目信息
 	if err := sql.UpdateProblem(req); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "internal server error"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
 		return
 	}
 
@@ -136,13 +136,13 @@ func DeleteCompetition(c *gin.Context) {
 func UpdateCompetitionInfo(c *gin.Context) {
 	var req global.AdminCompetitionInfoRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid request"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "invalidrequest")})
 		return
 	}
 
 	// 更新题目信息
 	if err := sql.UpdateCompetition(req); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "internal server error"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
 		return
 	}
 
