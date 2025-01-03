@@ -2,8 +2,26 @@ package config
 
 import "github.com/docker/docker/api/types/container"
 
+/////////////////////////////////////////// 服务器配置 //////////////////////////////////////////////
+
 // 后端模式
 const DebugMode = true
+
+// 服务器Address
+const ServerAddress = "127.0.0.1:37881"
+
+/////////////////////////////////////////// MySQL配置 //////////////////////////////////////////////
+
+// MySQL最大连接数
+const MaxOpenConns = 240
+
+// MySQL最大空闲连接数
+const MaxIdleConns = 100
+
+// MySQL连接最大生命周期（单位：秒）
+const MaxLifeTime = 32
+
+/////////////////////////////////////////// Docker配置 //////////////////////////////////////////////
 
 // SandBox配置（Docker）
 var SandBoxConfig = container.Resources{

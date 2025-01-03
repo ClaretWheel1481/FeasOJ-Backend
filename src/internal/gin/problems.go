@@ -48,7 +48,6 @@ func GetProblemInfo(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"problemInfo": problemInfo})
 }
 
-// 上传代码
 func UploadCode(c *gin.Context) {
 	problem := c.Param("pid")
 	pidInt, _ := strconv.Atoi(problem)
@@ -59,30 +58,51 @@ func UploadCode(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "invalidrequest")})
 		return
 	}
+
 	// 获取用户ID
 	userInfo := sql.SelectUserInfo(username)
+
+	rdb := utils.ConnectRedis()
+	defer rdb.Close()
+
+	// 提交频率限制
+	userRateLimitKey := fmt.Sprintf("ratelimit:%d", userInfo.Uid)
+
+	// 检查是否在限制时间内
+	exists, _ := rdb.Exists(userRateLimitKey).Result()
+	if exists == 1 {
+		c.JSON(http.StatusTooManyRequests, gin.H{"message": GetMessage(c, "rateLimit")})
+		return
+	}
+
+	// 设置限流键，10秒后自动失效
+	rdb.Set(userRateLimitKey, 1, 10*time.Second)
+
 	// 将文件名改为用户ID_题目ID
 	newFileName := fmt.Sprintf("%d_%s%s", userInfo.Uid, problem, path.Ext(file.Filename))
 	filepath := filepath.Join(global.CodeDir, newFileName)
+
 	// 保存文件到指定路径
 	if err := c.SaveUploadedFile(file, filepath); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
 		return
 	}
+
 	var language string
-	if path.Ext(file.Filename) == ".cpp" {
+	switch path.Ext(file.Filename) {
+	case ".cpp":
 		language = "C++"
-	} else if path.Ext(file.Filename) == ".java" {
+	case ".java":
 		language = "Java"
-	} else if path.Ext(file.Filename) == ".py" {
+	case ".py":
 		language = "Python"
-	} else if path.Ext(file.Filename) == ".go" {
+	case ".go":
 		language = "Go"
-	} else {
+	default:
 		language = "Unknown"
 	}
 
 	// 上传任务至Redis任务队列
-	rdb := utils.ConnectRedis()
 	err = rdb.RPush("judgeTask", newFileName).Err()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})

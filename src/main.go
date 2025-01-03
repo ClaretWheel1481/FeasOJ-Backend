@@ -130,8 +130,8 @@ func main() {
 		}
 	}
 	// TODO: 根据需求调整
-	// go startServer("https", "127.0.0.1:37881", "./certificate/fullchain.pem", "./certificate/privkey.key")
-	go startServer("http", "127.0.0.1:37881", "", "")
+	// go startServer("https", "config.ServerAddress", "./certificate/fullchain.pem", "./certificate/privkey.key")
+	go startServer("http", config.ServerAddress, "", "")
 
 	log.Println("[FeasOJ] Server activated.")
 

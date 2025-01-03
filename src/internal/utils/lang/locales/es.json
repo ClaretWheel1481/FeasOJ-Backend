@@ -7,5 +7,6 @@
   "captchaError": "Error de captcha",
   "userAlreadyinUse": "Nombre de usuario o correo electrónico ya utilizado",
   "userIsBanned": "Usuario está prohibido",
-  "wrongPassword": "Contraseña incorrecta"
+  "wrongPassword": "Contraseña incorrecta",
+  "rateLimit": "Ya has enviado esto una vez, por favor inténtalo de nuevo más tarde."
 }

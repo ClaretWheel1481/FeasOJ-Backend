@@ -7,5 +7,6 @@
   "captchaError": "驗證碼錯誤",
   "userAlreadyinUse": "用戶名或郵箱已經被使用。",
   "userIsBanned": "用戶已被封鎖",
-  "wrongPassword": "密碼錯誤"
+  "wrongPassword": "密碼錯誤",
+  "rateLimit": "您已經提交過一次，請稍後再試。"
 }
