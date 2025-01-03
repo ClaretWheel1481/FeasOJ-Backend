@@ -39,7 +39,7 @@ func main() {
 	// 遍历map，设置路径并创建不存在的目录
 	for name, dir := range dirs {
 		var mainDir string
-		if global.DebugMode {
+		if config.DebugMode {
 			mainDir = global.ParentDir
 		} else {
 			mainDir = global.CurrentDir

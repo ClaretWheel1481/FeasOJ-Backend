@@ -3,17 +3,33 @@ package judge
 import (
 	"fmt"
 	"log"
+	"src/config"
 	gincontext "src/internal/gin"
+	"src/internal/global"
 	"src/internal/utils/sql"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/go-redis/redis"
 )
 
-// 实时处理Redis任务队列中的任务
+type Task struct {
+	UID  int
+	PID  int
+	Name string
+}
+
 func ProcessJudgeTasks(rdb *redis.Client) {
+	taskChan := make(chan Task)
+	var wg sync.WaitGroup
+
+	for i := 0; i < config.MaxWorkers; i++ {
+		wg.Add(1)
+		go worker(taskChan, &wg)
+	}
+
 	for {
 		// 从Redis任务队列中取出一个任务
 		task, err := rdb.LPop("judgeTask").Result()
@@ -25,10 +41,6 @@ func ProcessJudgeTasks(rdb *redis.Client) {
 			log.Panic(err)
 			continue
 		}
-		// TODO: 实现当任务较多时，Sandbox的并发处理
-		// 执行任务
-		StartContainer()
-		str := CompileAndRun(task)
 
 		parts := strings.Split(task, "_")
 		uid := parts[0]
@@ -42,12 +54,32 @@ func ProcessJudgeTasks(rdb *redis.Client) {
 			log.Panic(err)
 		}
 
+		taskChan <- Task{UID: uidInt, PID: pidInt, Name: task}
+	}
+}
+
+// 并发处理
+func worker(taskChan chan Task, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for task := range taskChan {
+		containerID, err := StartContainer()
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		// 存储任务的容器ID
+		global.ContainerIDs.Store(task.Name, containerID)
+		str := CompileAndRun(task.Name, containerID)
+
+		// 终止任务对应的容器
+		TerminateContainer(containerID)
+
 		// 将结果从数据库中修改
-		sql.ModifyJudgeStatus(uidInt, pidInt, str)
+		sql.ModifyJudgeStatus(task.UID, task.PID, str)
 
 		// 发送SSE通知
-		if ch, ok := gincontext.Clients[uid]; ok {
-			ch <- fmt.Sprintf("Problem %d 运行完毕。", pidInt)
+		if ch, ok := gincontext.Clients[fmt.Sprint(task.UID)]; ok {
+			ch <- fmt.Sprintf("Problem %d 运行完毕。", task.PID)
 		}
 	}
 }

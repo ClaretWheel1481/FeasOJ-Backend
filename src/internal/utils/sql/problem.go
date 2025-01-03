@@ -34,6 +34,7 @@ func SelectProblemInfo(pid string) global.ProblemInfoRequest {
 		Timelimit:   problemall.Timelimit,
 		Memorylimit: problemall.Memorylimit,
 		Input:       problemall.Input,
+		Output:      problemall.Output,
 	}
 	return problem
 }
