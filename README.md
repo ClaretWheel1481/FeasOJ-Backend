@@ -58,3 +58,4 @@ If you find any bugs, please open an issue.
 - [docker](https://github.com/moby/moby)
 - [gomail](https://github.com/go-gomail/gomail)
 - [go-redis](https://github.com/redis/go-redis)
+- [go-i18n](https://github.com/nicksnyder/go-i18n)
