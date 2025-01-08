@@ -6,8 +6,16 @@ name: Go
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - '**/*'
+      - '!README.md'
+      - '!README_CN.md'
   pull_request:
     branches: [ "main" ]
+    paths:
+      - '**/*'
+      - '!README.md'
+      - '!README_CN.md'
 
 jobs:
 
