@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
-	"time"
 
 	"src/config"
 	"src/internal/global"
@@ -123,17 +122,18 @@ func main() {
 			}
 			if err != nil {
 				log.Printf("[FeasOJ] Server start error: %v\n", err)
-				time.Sleep(5 * time.Second)
-				continue
+				os.Exit(0)
 			}
-			break
 		}
 	}
-	// TODO: 根据需求调整
-	// go startServer("https", "config.ServerAddress", "./certificate/fullchain.pem", "./certificate/privkey.key")
-	go startServer("http", config.ServerAddress, "", "")
 
-	log.Println("[FeasOJ] Server activated.")
+	if config.EnableHTTPS {
+		go startServer("https", config.ServerAddress, config.ServerCertPath, config.ServerKeyPath)
+	} else {
+		go startServer("http", config.ServerAddress, "", "")
+	}
+
+	log.Println("[FeasOJ] Server is running on", config.ServerAddress, "Https Status:", config.EnableHTTPS)
 
 	// 监听终端输入
 	go func() {
