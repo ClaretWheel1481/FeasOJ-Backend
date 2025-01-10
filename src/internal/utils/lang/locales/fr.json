@@ -7,6 +7,9 @@
   "captchaError": "Veuillez résoudre le captcha",
   "userAlreadyinUse": "Nom d'utilisateur ou email déjà utilisé",
   "userIsBanned": "Utilisateur banni",
+  "userNotFound": "Utilisateur non trouvé",
+  "unauthorized": "Non autorisé",
+  "forbidden": "Interdit",
   "wrongPassword": "Mot de passe incorrect",
   "rateLimit": "Vous avez déjà soumis ce formulaire une fois, veuillez réessayer plus tard."
 }

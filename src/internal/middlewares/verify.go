@@ -3,6 +3,7 @@ package middlewares
 import (
 	"net/http"
 	"net/url"
+	gincontext "src/internal/gin"
 	"src/internal/utils"
 	"src/internal/utils/sql"
 
@@ -16,7 +17,7 @@ func HeaderVerify() gin.HandlerFunc {
 		username, err := url.QueryUnescape(encodedUsername)
 		token := c.GetHeader("Authorization")
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"message": "user not found"})
+			c.JSON(http.StatusBadRequest, gin.H{"message": gincontext.GetMessage(c, "userNotFound")})
 			c.Abort()
 			return
 		}
@@ -26,7 +27,7 @@ func HeaderVerify() gin.HandlerFunc {
 			User = username
 		}
 		if !utils.VerifyToken(User, token) {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "can't not verify token"})
+			c.JSON(http.StatusUnauthorized, gin.H{"message": gincontext.GetMessage(c, "unauthorized")})
 			c.Abort()
 			return
 		}

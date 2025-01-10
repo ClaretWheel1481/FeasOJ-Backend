@@ -11,7 +11,7 @@ const DebugMode = true
 const ServerAddress = "127.0.0.1:37882"
 
 // 启用https(当该选项启用时，请确保下方证书与私钥路径已经填写，服务器会创建/certificate目录，请将证书与私钥放入其中)
-const EnableHTTPS = true
+const EnableHTTPS = false
 
 // 服务器证书路径(./certificate/fullchain.pem)
 const ServerCertPath = "./certificate/fullchain.pem"

@@ -7,6 +7,9 @@
   "captchaError": "無効なキャプチャコードです",
   "userAlreadyinUse": "すでに使用されているユーザー名またはEメール",
   "userIsBanned": "このユーザーは禁止されています",
+  "userNotFound": "ユーザーが見つかりません",
+  "unauthorized": "認証に失敗しました",
+  "forbidden": "アクセスが拒否されました",
   "wrongPassword": "パスワードが間違っています",
   "rateLimit": "すでに送信済みです。後でもう一度送信してください。"
 }
