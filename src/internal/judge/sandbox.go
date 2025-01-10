@@ -26,6 +26,7 @@ func BuildImage() bool {
 	// 创建Docker客户端
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
+		log.Panic(err)
 		return false
 	}
 
@@ -52,6 +53,7 @@ func BuildImage() bool {
 	// 构建Docker镜像
 	buildResponse, err := cli.ImageBuild(ctx, tar, buildOptions)
 	if err != nil {
+		log.Panic(err)
 		return false
 	}
 	defer buildResponse.Body.Close()

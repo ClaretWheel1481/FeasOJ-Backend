@@ -10,6 +10,7 @@ var AvatarsDir string
 var CodeDir string
 var CurrentDir string
 var CertDir string
+var DocsDir string
 
 // 全局变量 - 容器ID
 var ContainerIDs sync.Map

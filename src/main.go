@@ -33,6 +33,7 @@ func main() {
 		"avatars":     &global.AvatarsDir,
 		"codefiles":   &global.CodeDir,
 		"logs":        &global.LogDir,
+		"docs":        &global.DocsDir,
 	}
 
 	// 遍历map，设置路径并创建不存在的目录
@@ -56,7 +57,7 @@ func main() {
 	}
 	defer utils.CloseLogger(logFile)
 
-	// 初始化配置文件
+	// 初始化配置
 	config.InitConfig()
 
 	// 初始化数据库
@@ -106,7 +107,10 @@ func main() {
 	router.LoadRouter(r)
 
 	// 挂载头像文件夹
-	r.StaticFS("/avatar", http.Dir(global.AvatarsDir))
+	r.StaticFS("/api/v1/avatar", http.Dir(global.AvatarsDir))
+
+	// 挂载文档文件夹
+	r.StaticFS("/api/v1/docs", http.Dir(global.DocsDir))
 
 	// 实时检测Redis JudgeTask中是否有任务
 	rdb := utils.ConnectRedis()
