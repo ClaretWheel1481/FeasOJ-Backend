@@ -34,7 +34,7 @@ func LoadRouter(r *gin.Engine) *gin.RouterGroup {
 		router1.GET("/competitions/:cid/users", gincontext.GetCompetitionUsers)
 
 		// 通知
-		router1.GET("/events/:uid", gincontext.SSEHandler)
+		router1.GET("/notification/:uid", gincontext.SSEHandler)
 	}
 
 	authGroup := router1.Group("")
