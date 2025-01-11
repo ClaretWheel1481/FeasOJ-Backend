@@ -1,6 +1,6 @@
 module src
 
-go 1.23.1
+go 1.23.4
 
 require (
 	github.com/docker/docker v27.4.1+incompatible

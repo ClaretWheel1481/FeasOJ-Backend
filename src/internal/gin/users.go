@@ -189,7 +189,7 @@ func UploadAvatar(c *gin.Context) {
 	}
 	// 压缩图像
 	if err := utils.CompressImage(originalFilePath, compressedFilePath); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
 		return
 	}
 	// 上传压缩后的头像路径至数据库

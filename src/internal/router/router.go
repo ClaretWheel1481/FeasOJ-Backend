@@ -55,10 +55,10 @@ func LoadRouter(r *gin.Engine) *gin.RouterGroup {
 		// 获取所有题目
 		authGroup.GET("/problems", gincontext.GetAllProblems)
 
-		// 获取所有讨论帖子
+		// 获取所有帖子
 		authGroup.GET("/discussions", gincontext.GetAllDiscussions)
 
-		// 根据题目ID获取题目信息
+		// 获取指定题目ID的所有信息
 		authGroup.GET("/problems/:id", gincontext.GetProblemInfo)
 
 		// 获取总提交记录
