@@ -19,7 +19,7 @@ import (
 	"github.com/docker/docker/pkg/archive"
 )
 
-// 构建Sandbox
+// BuildImage 构建Sandbox
 func BuildImage() bool {
 	ctx := context.Background()
 
@@ -67,7 +67,7 @@ func BuildImage() bool {
 	return true
 }
 
-// 启动Docker容器
+// StartContainer 启动Docker容器
 func StartContainer() (string, error) {
 	ctx := context.Background()
 
@@ -107,7 +107,7 @@ func StartContainer() (string, error) {
 	return resp.ID, nil
 }
 
-// 启动容器并编译运行文件、放入输入、捕获输出、对照输出
+// CompileAndRun 启动容器并编译运行文件、放入输入、捕获输出、对照输出
 func CompileAndRun(filename string, containerID string) string {
 	ext := filepath.Ext(filename)
 	var compileCmd *exec.Cmd
@@ -187,7 +187,7 @@ func CompileAndRun(filename string, containerID string) string {
 	return "Success"
 }
 
-// 终止并删除Docker容器
+// TerminateContainer 终止并删除Docker容器
 func TerminateContainer(containerID string) bool {
 	ctx := context.Background()
 

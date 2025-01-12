@@ -39,7 +39,6 @@ func ProcessJudgeTasks(rdb *redis.Client) {
 			continue
 		} else if err != nil {
 			log.Panic(err)
-			continue
 		}
 
 		parts := strings.Split(task, "_")
