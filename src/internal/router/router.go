@@ -30,9 +30,6 @@ func LoadRouter(r *gin.Engine) *gin.RouterGroup {
 		// 密码修改
 		router1.PUT("/users/password", gincontext.UpdatePassword)
 
-		// 获取竞赛参与的用户列表
-		router1.GET("/competitions/:cid/users", gincontext.GetCompetitionUsers)
-
 		// 通知
 		router1.GET("/notification/:uid", gincontext.SSEHandler)
 	}
@@ -47,7 +44,16 @@ func LoadRouter(r *gin.Engine) *gin.RouterGroup {
 		authGroup.GET("/discussions/comments/:did", gincontext.GetComment)
 
 		// 获取竞赛列表
-		authGroup.GET("/competitions", gincontext.GetCompetitionList)
+		authGroup.GET("/competitions", gincontext.GetCompetitionsList)
+
+		// 获取指定竞赛ID信息
+		authGroup.GET("/competitions/info/:cid", gincontext.GetCompetitionInfoByID)
+
+		// 获取竞赛参与的用户列表
+		authGroup.GET("/competitions/info/:cid/users", gincontext.GetCompetitionUsers)
+
+		// 获取指定竞赛的所有题目
+		authGroup.GET("/competitions/info/:cid/problems", gincontext.GetProblemsByCompetitionID)
 
 		// 获取用户是否在竞赛中
 		authGroup.GET("/competitions/:cid/in", gincontext.IsInCompetition)
@@ -75,6 +81,9 @@ func LoadRouter(r *gin.Engine) *gin.RouterGroup {
 
 		// 添加评论
 		authGroup.POST("/discussions/comments/:did", gincontext.AddComment)
+
+		// 加入有密码的竞赛
+		authGroup.POST("/competitions/join/pwd/:cid", gincontext.JoinCompetitionWithPassword)
 
 		// 加入竞赛
 		authGroup.POST("/competitions/join/:cid", gincontext.JoinCompetition)

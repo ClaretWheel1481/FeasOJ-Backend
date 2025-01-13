@@ -6,11 +6,18 @@ import (
 	"time"
 )
 
-// 用户获取竞赛信息
-func SelectCompetitionInfo() []global.CompetitionRequest {
+// 用户获取竞赛列表信息
+func SelectCompetitionsInfo() []global.CompetitionRequest {
 	var competitions []global.CompetitionRequest
 	utils.ConnectSql().Table("competitions").Where("is_visible = ?", true).Order("start_at DESC").Find(&competitions)
 	return competitions
+}
+
+// 用户获取指定竞赛ID信息
+func SelectCompetitionInfoByCid(Cid int) global.CompetitionRequest {
+	var competition global.CompetitionRequest
+	utils.ConnectSql().Table("competitions").Where("contest_id = ?", Cid).Find(&competition)
+	return competition
 }
 
 // 管理员获取竞赛信息
@@ -55,17 +62,21 @@ func AddUserCompetition(userId int, competitionId int) error {
 }
 
 // 查询指定竞赛参加的所有用户
-func SelectUsersCompetition(competitionId int) []global.UserCompetitions {
-	var users []global.UserCompetitions
-	utils.ConnectSql().Table("user_competitions").Where("contest_id = ?", competitionId).Find(&users)
+func SelectUsersCompetition(competitionId int) []global.CompetitionUserRequest {
+	var users []global.CompetitionUserRequest
+
+	utils.ConnectSql().Table("user_competitions").
+		Select("user_competitions.contest_id, user_competitions.uid, user_competitions.username, user_competitions.join_date, users.avatar").
+		Joins("JOIN users ON user_competitions.uid = users.uid").
+		Where("user_competitions.contest_id = ?", competitionId).
+		Find(&users)
+
 	return users
 }
 
 // 查询用户是否在指定竞赛中
 func SelectUserCompetition(userId int, competitionId int) bool {
-	var userCompetition global.UserCompetitions
-	utils.ConnectSql().Table("user_competitions").Where("uid = ? AND contest_id = ?", userId, competitionId).Find(&userCompetition)
-	return userCompetition.Uid != 0
+	return utils.ConnectSql().Table("user_competitions").Where("uid = ? AND contest_id = ?", userId, competitionId).Find(&global.UserCompetitions{}).RowsAffected > 0
 }
 
 // 将用户从用户-竞赛表删除
@@ -79,12 +90,37 @@ func DeleteUserCompetition(userId int, competitionId int) error {
 // 竞赛状态更新
 func UpdateCompetitionStatus() error {
 	now := time.Now()
-	if err := utils.ConnectSql().Table("competitions").Where("start_at <= ? AND end_at >= ?", now, now).Update("enable", true).Error; err != nil {
+
+	// 状态为 1：正在进行中
+	if err := utils.ConnectSql().Table("competitions").
+		Where("start_at <= ? AND end_at >= ?", now, now).
+		Update("status", 1).Error; err != nil {
 		return err
 	}
-	if err := utils.ConnectSql().Table("competitions").Where("end_at < ?", now).
-		Update("enable", false).Error; err != nil {
+
+	// 状态为 2：已结束
+	if err := utils.ConnectSql().Table("competitions").
+		Where("end_at < ?", now).
+		Update("status", 2).Error; err != nil {
 		return err
 	}
+
+	// 状态为 0：未开始
+	if err := utils.ConnectSql().Table("competitions").
+		Where("start_at > ?", now).
+		Update("status", 0).Error; err != nil {
+		return err
+	}
+
 	return nil
+}
+
+// 获取未开始的竞赛
+func GetUpcomingCompetitions() []global.Competition {
+	var competitions []global.Competition
+	err := utils.ConnectSql().Where("start_at > ?", time.Now()).Find(&competitions).Error
+	if err != nil {
+		return nil
+	}
+	return competitions
 }

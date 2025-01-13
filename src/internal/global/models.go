@@ -135,6 +135,7 @@ type AdminCompetitionInfoRequest struct {
 	Difficulty   string    `json:"difficulty"`
 	Password     string    `json:"password"`
 	HavePassword bool      `json:"have_password"`
+	Announcement string    `json:"announcement"`
 	IsVisible    bool      `json:"is_visible"`
 	Start_at     time.Time `json:"start_at"`
 	End_at       time.Time `json:"end_at"`
@@ -147,8 +148,19 @@ type CompetitionRequest struct {
 	Subtitle     string    `json:"subtitle"`
 	Difficulty   string    `json:"difficulty"`
 	HavePassword bool      `json:"have_password"`
+	Announcement string    `json:"announcement"`
+	Status       int       `json:"status"`
 	Start_at     time.Time `json:"start_at"`
 	End_at       time.Time `json:"end_at"`
+}
+
+// 获取参赛人员请求体
+type CompetitionUserRequest struct {
+	ContestID int       `json:"contest_id"`
+	Uid       int       `json:"uid"`
+	Username  string    `json:"username"`
+	Avatar    string    `json:"avatar"`
+	Join_date time.Time `json:"join_date"`
 }
 
 // 用户表：uid, avatar, username, password, email, score, synopsis, create_at, role, token_secret, is_ban
@@ -217,7 +229,7 @@ type TestCase struct {
 	OutputData string `gorm:"comment:输出数据;not null"`
 }
 
-// 竞赛表：ContestID, Title, Subtitle, Difficulty, Password, HavePassword, IsVisible, Enable, Start_at, End_at
+// 竞赛表: ContestID, Title, Subtitle, Difficulty, Password, HavePassword, IsVisible, Status, Announcement, Start_at, End_at
 type Competition struct {
 	ContestID    int       `gorm:"comment:比赛ID;primaryKey;autoIncrement"`
 	Title        string    `gorm:"comment:标题;not null"`
@@ -226,7 +238,8 @@ type Competition struct {
 	Password     string    `gorm:"comment:密码;"`
 	HavePassword bool      `gorm:"comment:是否有密码;not null"`
 	IsVisible    bool      `gorm:"comment:是否可见;not null"`
-	Enable       bool      `gorm:"comment:是否可用;not null"`
+	Status       int       `gorm:"comment:竞赛状态，0=未开始，1=正在进行中，2=已结束;"`
+	Announcement string    `gorm:"comment:公告;"`
 	Start_at     time.Time `gorm:"comment:开始时间;not null"`
 	End_at       time.Time `gorm:"comment:结束时间;not null"`
 }

@@ -11,5 +11,6 @@
   "unauthorized": "Non autorizzato",
   "forbidden": "Vietato",
   "wrongPassword": "Password errata",
-  "rateLimit": "Hai già inviato questo messaggio una volta, riprova più tardi."
+  "rateLimit": "Hai già inviato questo messaggio una volta, riprova più tardi.",
+  "userAlreadyExists": "Utente già esistente"
 }

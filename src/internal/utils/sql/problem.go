@@ -3,6 +3,7 @@ package sql
 import (
 	"src/internal/global"
 	"src/internal/utils"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -157,4 +158,44 @@ func DeleteProblemAllInfo(pid int) bool {
 	}
 
 	return true
+}
+
+// 获取指定竞赛ID的所有题目列表
+func SelectProblemsByCompID(competitionID int) []global.ProblemInfoRequest {
+	var problems []global.ProblemInfoRequest
+	if err := utils.ConnectSql().Table("problems").Where("contest_id = ?", competitionID).Find(&problems).Error; err != nil {
+		return nil
+	}
+	return problems
+}
+
+// 获取指定题目ID是否可用
+func IsProblemVisible(problemID int) bool {
+	return utils.ConnectSql().Table("problems").Where("pid = ? AND is_visible = ?", problemID, 1).First(&global.Problem{}).Error == nil
+}
+
+// 题目状态更新
+func UpdateProblemVisibility(now time.Time) error {
+	// 更新状态为正在进行中的题目：is_visible 为 1
+	if err := utils.ConnectSql().Table("problems").
+		Where("contest_id IN (SELECT contest_id FROM competitions WHERE start_at <= ? AND end_at >= ?)", now, now).
+		Update("is_visible", 1).Error; err != nil {
+		return err
+	}
+
+	// 更新状态为已结束的题目：is_visible 为 1
+	if err := utils.ConnectSql().Table("problems").
+		Where("contest_id IN (SELECT contest_id FROM competitions WHERE end_at < ?)", now).
+		Update("is_visible", 1).Error; err != nil {
+		return err
+	}
+
+	// 更新状态为未开始的题目：is_visible 为 0
+	if err := utils.ConnectSql().Table("problems").
+		Where("contest_id IN (SELECT contest_id FROM competitions WHERE start_at > ?)", now).
+		Update("is_visible", 0).Error; err != nil {
+		return err
+	}
+
+	return nil
 }

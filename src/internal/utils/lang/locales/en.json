@@ -11,5 +11,6 @@
   "unauthorized": "Unauthorized",
   "forbidden": "Forbidden",
   "wrongPassword": "Wrong Password",
-  "rateLimit": "You've already submitted this once, please try again later."
+  "rateLimit": "You've already submitted this once, please try again later.",
+  "userAlreadyExists": "User already exists"
 }

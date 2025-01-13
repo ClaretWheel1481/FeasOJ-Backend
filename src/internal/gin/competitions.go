@@ -10,21 +10,60 @@ import (
 )
 
 // 用户获取竞赛列表
-func GetCompetitionList(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"contests": sql.SelectCompetitionInfo()})
+func GetCompetitionsList(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"contests": sql.SelectCompetitionsInfo()})
+}
+
+// 用户获取指定竞赛ID信息
+func GetCompetitionInfoByID(c *gin.Context) {
+	encodedUsername := c.GetHeader("Username")
+	username, _ := url.QueryUnescape(encodedUsername)
+	competitionId, _ := strconv.Atoi(c.Param("cid"))
+	uid := sql.SelectUserInfo(username).Uid
+	if sql.SelectUserCompetition(uid, competitionId) {
+		c.JSON(http.StatusOK, gin.H{"contest": sql.SelectCompetitionInfoByCid(competitionId)})
+		return
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "failed")})
+	}
+}
+
+// 用户加入有密码的竞赛
+func JoinCompetitionWithPassword(c *gin.Context) {
+	encodedUsername := c.GetHeader("Username")
+	username, _ := url.QueryUnescape(encodedUsername)
+	competitionId, _ := strconv.Atoi(c.Param("cid"))
+	competitionPwd := c.Query("password")
+	uid := sql.SelectUserInfo(username).Uid
+	if sql.SelectUserCompetition(uid, competitionId) {
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "userAlreadyExists")})
+		return
+	}
+	if sql.SelectCompetitionInfoAdminByCid(competitionId).Password == competitionPwd {
+		if sql.AddUserCompetition(uid, competitionId) == nil {
+			c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
+			return
+		}
+	}
+
+	c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "failed")})
 }
 
 // 用户加入竞赛
 func JoinCompetition(c *gin.Context) {
 	encodedUsername := c.GetHeader("Username")
 	username, _ := url.QueryUnescape(encodedUsername)
-	competitionId := c.Param("cid")
-	competitionIdInt, _ := strconv.Atoi(competitionId)
+	competitionId, _ := strconv.Atoi(c.Param("cid"))
 	uid := sql.SelectUserInfo(username).Uid
-	if sql.AddUserCompetition(uid, competitionIdInt) == nil {
+	if sql.SelectUserCompetition(uid, competitionId) {
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "userAlreadyExists")})
+		return
+	}
+	if sql.AddUserCompetition(uid, competitionId) == nil {
 		c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 		return
 	}
+
 	c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "failed")})
 }
 
@@ -32,10 +71,9 @@ func JoinCompetition(c *gin.Context) {
 func IsInCompetition(c *gin.Context) {
 	encodedUsername := c.GetHeader("Username")
 	username, _ := url.QueryUnescape(encodedUsername)
-	competitionId := c.Param("cid")
-	competitionIdInt, _ := strconv.Atoi(competitionId)
+	competitionId, _ := strconv.Atoi(c.Param("cid"))
 	uid := sql.SelectUserInfo(username).Uid
-	if sql.SelectUserCompetition(uid, competitionIdInt) {
+	if sql.SelectUserCompetition(uid, competitionId) {
 		c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success"), "isIn": true})
 		return
 	}
@@ -44,21 +82,29 @@ func IsInCompetition(c *gin.Context) {
 
 // 查询指定竞赛中的所有参与用户
 func GetCompetitionUsers(c *gin.Context) {
-	competitionId := c.Param("cid")
-	competitionIdInt, _ := strconv.Atoi(competitionId)
-	c.JSON(http.StatusOK, gin.H{"users": sql.SelectUsersCompetition(competitionIdInt)})
+	competitionId, _ := strconv.Atoi(c.Param("cid"))
+	c.JSON(http.StatusOK, gin.H{"users": sql.SelectUsersCompetition(competitionId)})
 }
 
 // 用户退出竞赛
 func QuitCompetition(c *gin.Context) {
 	encodedUsername := c.GetHeader("Username")
 	username, _ := url.QueryUnescape(encodedUsername)
-	competitionId := c.Param("cid")
-	competitionIdInt, _ := strconv.Atoi(competitionId)
+	competitionId, _ := strconv.Atoi(c.Param("cid"))
 	uid := sql.SelectUserInfo(username).Uid
-	if sql.DeleteUserCompetition(uid, competitionIdInt) == nil {
+	if sql.DeleteUserCompetition(uid, competitionId) == nil {
 		c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 		return
 	}
 	c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "failed")})
+}
+
+// 获取指定竞赛的所有题目
+func GetProblemsByCompetitionID(c *gin.Context) {
+	competitionId, _ := strconv.Atoi(c.Param("cid"))
+	if sql.SelectCompetitionInfoByCid(competitionId).Status == 0 {
+		c.JSON(http.StatusForbidden, gin.H{"message": GetMessage(c, "forbidden")})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"problems": sql.SelectProblemsByCompID(competitionId)})
 }

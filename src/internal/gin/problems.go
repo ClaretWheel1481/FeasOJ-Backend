@@ -24,6 +24,11 @@ func GetAllProblems(c *gin.Context) {
 
 // 获取题目信息
 func GetProblemInfo(c *gin.Context) {
+	pid, _ := strconv.Atoi(c.Param("id"))
+	if sql.IsProblemVisible(pid) == false {
+		c.JSON(http.StatusForbidden, gin.H{"message": GetMessage(c, "forbidden")})
+		return
+	}
 	// 生成缓存键
 	cacheKey := "problemInfo_" + c.Param("id")
 	var problemInfo global.ProblemInfoRequest

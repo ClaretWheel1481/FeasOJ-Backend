@@ -9,7 +9,7 @@ import (
 
 var Clients = make(map[string]chan string)
 
-// SSE处理器
+// SSEHandler SSE推送
 func SSEHandler(c *gin.Context) {
 	uid := c.Param("uid")
 	messageChan := make(chan string)

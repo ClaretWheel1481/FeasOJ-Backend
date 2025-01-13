@@ -13,7 +13,7 @@ import (
 	"src/internal/judge"
 	"src/internal/router"
 	"src/internal/utils"
-	"src/internal/utils/schedule"
+	"src/internal/utils/scheduler"
 	"src/internal/utils/sql"
 
 	"syscall"
@@ -99,7 +99,7 @@ func main() {
 	}
 
 	// 启用竞赛状态调度器
-	go schedule.ScheduleCompetitionStatus()
+	go scheduler.ScheduleCompetitionStatus()
 
 	// 启动服务器
 	gin.SetMode(gin.ReleaseMode)

@@ -11,5 +11,6 @@
   "unauthorized": "Non autorisé",
   "forbidden": "Interdit",
   "wrongPassword": "Mot de passe incorrect",
-  "rateLimit": "Vous avez déjà soumis ce formulaire une fois, veuillez réessayer plus tard."
+  "rateLimit": "Vous avez déjà soumis ce formulaire une fois, veuillez réessayer plus tard.",
+  "userAlreadyExists": "Utilisateur déjà existant"
 }
