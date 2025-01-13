@@ -2,10 +2,13 @@ package judge
 
 import (
 	"fmt"
+	"github.com/nicksnyder/go-i18n/v2/i18n"
+	"golang.org/x/text/language"
 	"log"
 	"src/config"
 	gincontext "src/internal/gin"
 	"src/internal/global"
+	"src/internal/utils"
 	"src/internal/utils/sql"
 	"strconv"
 	"strings"
@@ -77,8 +80,18 @@ func worker(taskChan chan Task, wg *sync.WaitGroup) {
 		sql.ModifyJudgeStatus(task.UID, task.PID, str)
 
 		// 发送SSE通知
-		if ch, ok := gincontext.Clients[fmt.Sprint(task.UID)]; ok {
-			ch <- fmt.Sprintf("Problem %d 运行完毕。", task.PID)
+		if client, ok := gincontext.Clients[fmt.Sprint(task.UID)]; ok {
+			lang := client.Lang
+			tag := language.Make(lang)
+			langBundle := utils.InitI18n()
+			localizer := i18n.NewLocalizer(langBundle, tag.String())
+			message, _ := localizer.Localize(&i18n.LocalizeConfig{
+				MessageID: "problem_completed",
+				TemplateData: map[string]interface{}{
+					"PID": task.PID,
+				},
+			})
+			client.MessageChan <- message
 		}
 	}
 }

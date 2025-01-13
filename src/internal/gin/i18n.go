@@ -1,11 +1,10 @@
 package gincontext
 
 import (
-	"src/internal/utils/lang"
-
 	"github.com/gin-gonic/gin"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"
+	"src/internal/utils"
 )
 
 func GetLangFromHeader(c *gin.Context) language.Tag {
@@ -20,7 +19,7 @@ func GetLangFromHeader(c *gin.Context) language.Tag {
 
 // 获取国际化消息
 func GetMessage(c *gin.Context, messageID string) string {
-	langBundle := lang.InitI18n()
+	langBundle := utils.InitI18n()
 	tag := GetLangFromHeader(c)
 	localizer := i18n.NewLocalizer(langBundle, tag.String())
 

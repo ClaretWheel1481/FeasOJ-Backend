@@ -12,5 +12,7 @@
   "forbidden": "Vietato",
   "wrongPassword": "Password errata",
   "rateLimit": "Hai già inviato questo messaggio una volta, riprova più tardi.",
-  "userAlreadyExists": "Utente già esistente"
+  "userAlreadyExists": "Utente già esistente",
+  "competition_started": "Il concorso a cui avete partecipato è iniziato.",
+  "problem_completed": "Problema {{.PID}} completato!"
 }

@@ -12,5 +12,7 @@
   "forbidden": "アクセスが拒否されました",
   "wrongPassword": "パスワードが間違っています",
   "rateLimit": "すでに送信済みです。後でもう一度送信してください。",
-  "userAlreadyExists": "ユーザーがすでに存在します"
+  "userAlreadyExists": "ユーザーがすでに存在します",
+  "competition_started": "あなたがエントリーした大会が始まりました。",
+  "problem_completed": "問題{{.PID}}が完了しました！"
 }

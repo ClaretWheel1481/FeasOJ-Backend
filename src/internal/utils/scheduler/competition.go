@@ -3,10 +3,14 @@ package scheduler
 import (
 	"fmt"
 	"log"
+	gincontext "src/internal/gin"
+	"src/internal/utils"
 	"time"
 
 	"github.com/go-co-op/gocron"
-	"src/internal/gin"
+	"github.com/nicksnyder/go-i18n/v2/i18n"
+	"golang.org/x/text/language"
+
 	"src/internal/utils/sql"
 )
 
@@ -40,9 +44,16 @@ func ScheduleCompetitionStatus() {
 							// 发送竞赛开始的消息
 							for _, user := range usersInCompetition {
 								if user.ContestID == competition.ContestID {
-									if ch, ok := gincontext.Clients[fmt.Sprint(user.Uid)]; ok {
-										ch <- "您参加的竞赛已经开始。"
-										// TODO: i18n
+									if client, ok := gincontext.Clients[fmt.Sprint(user.Uid)]; ok {
+										// 获取用户语言
+										lang := client.Lang
+										tag := language.Make(lang)
+										langBundle := utils.InitI18n()
+										localizer := i18n.NewLocalizer(langBundle, tag.String())
+										message, _ := localizer.Localize(&i18n.LocalizeConfig{
+											MessageID: "competition_started",
+										})
+										client.MessageChan <- message
 									}
 								}
 							}
@@ -60,7 +71,7 @@ func ScheduleCompetitionStatus() {
 			}
 
 			// 更新题目状态
-			if err := sql.UpdateProblemVisibility(now); err != nil {
+			if err := sql.UpdateProblemVisibility(); err != nil {
 				log.Println("[FeasOJ] Error updating competition's problem status:", err)
 			}
 		})
