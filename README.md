@@ -27,7 +27,8 @@ FeasOJ-Backend
 │  │  ├─router
 │  │  └─utils
 │  │    ├─lang
-│  │    ├─schedule
+│  │    │   └─locales   # i18n files
+│  │    ├─scheduler
 │  │    └─sql
 │  ├─go.mod
 │  └─main.go    # Main entry file
