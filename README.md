@@ -26,8 +26,7 @@ FeasOJ-Backend
 │  │  ├─middlewares
 │  │  ├─router
 │  │  └─utils
-│  │    ├─lang
-│  │    │   └─locales   # i18n files
+│  │    ├─locales   # i18n files
 │  │    ├─scheduler
 │  │    └─sql
 │  ├─go.mod
