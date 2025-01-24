@@ -1,8 +1,10 @@
 package gincontext
 
 import (
+	"gorm.io/gorm"
 	"net/http"
 	"src/internal/global"
+	"src/internal/utils"
 	"src/internal/utils/sql"
 	"strconv"
 
@@ -147,4 +149,72 @@ func UpdateCompetitionInfo(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
+}
+
+// 计算分数
+func CalculateScore(c *gin.Context) {
+	competitionId, err := strconv.Atoi(c.Param("cid"))
+	if err != nil {
+		c.JSON(400, gin.H{"error": "Invalid competition ID"})
+		return
+	}
+
+	// 查询竞赛信息
+	var competition global.Competition
+	result := utils.ConnectSql().First(&competition, competitionId)
+	if result.Error != nil {
+		c.JSON(404, gin.H{"error": "Competition not found"})
+		return
+	}
+
+	// 查询竞赛参与用户
+	users := sql.SelectUsersCompetition(competitionId)
+	if len(users) == 0 {
+		c.JSON(200, gin.H{"message": "No users in competition"})
+		return
+	}
+
+	// 遍历所有参与竞赛的用户
+	for _, user := range users {
+		var submissions []global.SubmitRecord
+		utils.ConnectSql().
+			Where("uid = ? AND result = ? AND time BETWEEN ? AND ?",
+				user.Uid,
+				"Success",
+				competition.Start_at,
+				competition.End_at).
+			Find(&submissions)
+
+		// 计算分数
+		score := 0
+		for _, submission := range submissions {
+			var difficulty string
+			err := utils.ConnectSql().
+				Table("problems").
+				Select("difficulty").
+				Where("contest_id = ? AND pid = ?", competitionId, submission.Pid).
+				Row().
+				Scan(&difficulty)
+			if err != nil {
+				continue
+			}
+
+			switch difficulty {
+			case "简单":
+				score += 1
+			case "中等":
+				score += 3
+			case "困难":
+				score += 5
+			}
+		}
+
+		// 更新用户分数
+		if score > 0 {
+			utils.ConnectSql().Model(&global.User{}).Where("uid = ?", user.Uid).Update("score", gorm.Expr("score + ?", score))
+		}
+
+		// TODO: 额外建一个竞赛情况表，用于存储用户在某个竞赛中获取的分数，用于后台统计
+	}
+	c.JSON(200, gin.H{"message": "Scores calculated successfully"})
 }

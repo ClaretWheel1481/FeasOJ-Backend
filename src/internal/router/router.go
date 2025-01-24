@@ -147,6 +147,9 @@ func LoadRouter(r *gin.Engine) *gin.RouterGroup {
 
 		// 管理员删除竞赛
 		adminGroup.DELETE("/competitions/:cid", gincontext.DeleteCompetition)
+
+		// 管理员启用竞赛计分
+		adminGroup.GET("/competitions/:cid/score", gincontext.CalculateScore)
 	}
 	return router1
 }

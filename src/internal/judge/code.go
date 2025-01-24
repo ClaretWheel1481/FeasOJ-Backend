@@ -41,7 +41,7 @@ func ProcessJudgeTasks(rdb *redis.Client) {
 			time.Sleep(2 * time.Second)
 			continue
 		} else if err != nil {
-			log.Panic(err)
+			log.Panic("[FeasOJ] Redis connect error: ", err)
 		}
 
 		parts := strings.Split(task, "_")

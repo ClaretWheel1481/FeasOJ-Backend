@@ -127,18 +127,29 @@ type AdminProblemInfoRequest struct {
 	TestCases   []TestCaseRequest `json:"test_cases"`
 }
 
-// 竞赛信息请求体
+// 管理员获取竞赛信息请求体
 type AdminCompetitionInfoRequest struct {
 	ContestID    int       `json:"contest_id"`
 	Title        string    `json:"title"`
 	Subtitle     string    `json:"subtitle"`
 	Difficulty   string    `json:"difficulty"`
 	Password     string    `json:"password"`
+	Status       int       `json:"status"`
+	Scored       bool      `json:"scored"`
 	HavePassword bool      `json:"have_password"`
 	Announcement string    `json:"announcement"`
 	IsVisible    bool      `json:"is_visible"`
 	Start_at     time.Time `json:"start_at"`
 	End_at       time.Time `json:"end_at"`
+}
+
+// 管理员获取竞赛情况请求体
+type AdminCompetitionScoreRequest struct {
+	ContestID int       `json:"contest_id"`
+	Uid       int       `json:"uid"`
+	Username  string    `json:"username"`
+	Score     int       `json:"score"`
+	JoinDate  time.Time `json:"join_date"`
 }
 
 // 用户获取竞赛请求体
@@ -160,7 +171,7 @@ type CompetitionUserRequest struct {
 	Uid       int       `json:"uid"`
 	Username  string    `json:"username"`
 	Avatar    string    `json:"avatar"`
-	Join_date time.Time `json:"join_date"`
+	JoinDate  time.Time `json:"join_date"`
 }
 
 // 用户表：uid, avatar, username, password, email, score, synopsis, create_at, role, token_secret, is_ban
@@ -236,6 +247,7 @@ type Competition struct {
 	Subtitle     string    `gorm:"comment:副标题;not null"`
 	Difficulty   string    `gorm:"comment:难度;not null"`
 	Password     string    `gorm:"comment:密码;"`
+	Scored       bool      `gorm:"comment:是否已计分;not null"`
 	HavePassword bool      `gorm:"comment:是否有密码;not null"`
 	IsVisible    bool      `gorm:"comment:是否可见;not null"`
 	Status       int       `gorm:"comment:竞赛状态，0=未开始，1=正在进行中，2=已结束;"`
@@ -250,4 +262,5 @@ type UserCompetitions struct {
 	Uid       int       `gorm:"comment:用户ID;not null"`
 	Username  string    `gorm:"comment:用户名;not null"`
 	Join_date time.Time `gorm:"comment:加入时间;not null"`
+	Score     int       `gorm:"comment:用户在该竞赛获取的分数;"`
 }
