@@ -124,3 +124,15 @@ func GetUpcomingCompetitions() []global.Competition {
 	}
 	return competitions
 }
+
+// 获取竞赛分数情况
+func GetScores(competitionId, page, itemsPerPage int) ([]global.UserCompetitions, int64) {
+	var users []global.UserCompetitions
+	var total int64
+
+	db := utils.ConnectSql().Where("contest_id = ?", competitionId)
+	db.Model(&global.UserCompetitions{}).Count(&total)
+	db.Offset((page - 1) * itemsPerPage).Limit(itemsPerPage).Find(&users)
+
+	return users, total
+}

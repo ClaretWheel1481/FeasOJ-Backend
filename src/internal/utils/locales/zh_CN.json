@@ -14,5 +14,6 @@
   "rateLimit": "您已经提交过一次，请稍后再试。",
   "userAlreadyExists": "用户已存在",
   "competition_started": "您参与的比赛已经开始。",
-  "problem_completed": "题目 {{.PID}} 运行完毕！"
+  "problem_completed": "题目 {{.PID}} 运行完毕！",
+  "competition_scored": "竞赛已评分。"
 }

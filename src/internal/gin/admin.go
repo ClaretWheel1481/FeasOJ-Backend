@@ -153,24 +153,20 @@ func UpdateCompetitionInfo(c *gin.Context) {
 
 // 计算分数
 func CalculateScore(c *gin.Context) {
-	competitionId, err := strconv.Atoi(c.Param("cid"))
-	if err != nil {
-		c.JSON(400, gin.H{"error": "Invalid competition ID"})
-		return
-	}
+	competitionId, _ := strconv.Atoi(c.Param("cid"))
 
 	// 查询竞赛信息
 	var competition global.Competition
-	result := utils.ConnectSql().First(&competition, competitionId)
-	if result.Error != nil {
-		c.JSON(404, gin.H{"error": "Competition not found"})
+	utils.ConnectSql().First(&competition, competitionId)
+	if competition.Scored {
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "competition_scored")})
 		return
 	}
 
 	// 查询竞赛参与用户
 	users := sql.SelectUsersCompetition(competitionId)
 	if len(users) == 0 {
-		c.JSON(200, gin.H{"message": "No users in competition"})
+		c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 		return
 	}
 
@@ -214,7 +210,24 @@ func CalculateScore(c *gin.Context) {
 			utils.ConnectSql().Model(&global.User{}).Where("uid = ?", user.Uid).Update("score", gorm.Expr("score + ?", score))
 		}
 
-		// TODO: 额外建一个竞赛情况表，用于存储用户在某个竞赛中获取的分数，用于后台统计
+		utils.ConnectSql().Model(&global.UserCompetitions{}).Where("uid = ?", user.Uid).Update("score", score)
 	}
-	c.JSON(200, gin.H{"message": "Scores calculated successfully"})
+
+	utils.ConnectSql().Model(&global.Competition{}).Where("contest_id = ?", competitionId).Update("scored", true)
+
+	c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
+}
+
+// 查询指定竞赛中，参与人员的得分情况
+func GetScoreBoard(c *gin.Context) {
+	competitionId, _ := strconv.Atoi(c.Param("cid"))
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	itemsPerPage, _ := strconv.Atoi(c.DefaultQuery("itemsPerPage", "10"))
+
+	users, total := sql.GetScores(competitionId, page, itemsPerPage)
+
+	c.JSON(http.StatusOK, gin.H{
+		"users": users,
+		"total": total,
+	})
 }

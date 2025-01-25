@@ -116,3 +116,10 @@ func SelectAdminCount() int64 {
 	utils.ConnectSql().Table("users").Where("role = ?", 1).Count(&count)
 	return count
 }
+
+// 从高到低按照score排序获取前100名用户
+func SelectRank100Users() []global.UserInfoRequest {
+	var usersInfo []global.UserInfoRequest
+	utils.ConnectSql().Table("users").Order("score desc").Limit(100).Find(&usersInfo)
+	return usersInfo
+}

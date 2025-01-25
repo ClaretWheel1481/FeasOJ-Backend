@@ -64,6 +64,9 @@ func LoadRouter(r *gin.Engine) *gin.RouterGroup {
 		// 获取所有帖子
 		authGroup.GET("/discussions", gincontext.GetAllDiscussions)
 
+		// 获取排行榜
+		authGroup.GET("/ranking", gincontext.GetRanking)
+
 		// 获取指定题目ID的所有信息
 		authGroup.GET("/problems/:id", gincontext.GetProblemInfo)
 
@@ -150,6 +153,9 @@ func LoadRouter(r *gin.Engine) *gin.RouterGroup {
 
 		// 管理员启用竞赛计分
 		adminGroup.GET("/competitions/:cid/score", gincontext.CalculateScore)
+
+		// 管理员查看竞赛得分情况
+		adminGroup.GET("/competitions/:cid/scoreboard", gincontext.GetScoreBoard)
 	}
 	return router1
 }

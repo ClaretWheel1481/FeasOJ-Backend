@@ -11,6 +11,7 @@ import (
 	"src/internal/global"
 	"src/internal/utils"
 	"src/internal/utils/sql"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -198,4 +199,23 @@ func UploadAvatar(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
+}
+
+// 获取排行榜
+func GetRanking(c *gin.Context) {
+	cacheKey := "ranking"
+	// 从缓存中获取数据
+	var ranking []global.UserInfoRequest
+	err := utils.GetCache(cacheKey, &ranking)
+	if err != nil || len(ranking) == 0 {
+		ranking = sql.SelectRank100Users()
+		// 缓存5分钟
+		err := utils.SetCache(cacheKey, ranking, 5*time.Minute)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"ranking": ranking})
 }

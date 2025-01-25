@@ -14,5 +14,6 @@
   "rateLimit": "Ya has enviado esto una vez, por favor inténtalo de nuevo más tarde.",
   "userAlreadyExists": "El usuario ya existe",
   "competition_started": "El concurso en el que has participado ya ha comenzado.",
-  "problem_completed": "Problema {{.PID}} ¡completado!"
+  "problem_completed": "Problema {{.PID}} ¡completado!",
+  "competition_scored": "Se ha puntuado la competición."
 }

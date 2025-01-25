@@ -14,5 +14,6 @@
   "rateLimit": "すでに送信済みです。後でもう一度送信してください。",
   "userAlreadyExists": "ユーザーがすでに存在します",
   "competition_started": "あなたがエントリーした大会が始まりました。",
-  "problem_completed": "問題{{.PID}}が完了しました！"
+  "problem_completed": "問題{{.PID}}が完了しました！",
+  "competition_scored": "コンペティションは採点された。"
 }

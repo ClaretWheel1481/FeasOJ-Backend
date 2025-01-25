@@ -14,5 +14,6 @@
   "rateLimit": "Vous avez déjà soumis ce formulaire une fois, veuillez réessayer plus tard.",
   "userAlreadyExists": "Utilisateur déjà existant",
   "competition_started": "Le concours auquel vous avez participé a commencé.",
-  "problem_completed": "Problème {{.PID}} résolu!"
+  "problem_completed": "Problème {{.PID}} résolu!",
+  "competition_scored": "Le concours a été noté."
 }
