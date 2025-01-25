@@ -1,10 +1,13 @@
 package gincontext
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
+	"src/internal/utils"
 	"src/internal/utils/sql"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -34,11 +37,31 @@ func CreateDiscussion(c *gin.Context) {
 	username, _ := url.QueryUnescape(encodedUsername)
 	title := c.PostForm("title")
 	content := c.PostForm("content")
-	uid := sql.SelectUserInfo(username).Uid
+
+	// 获取用户ID
+	userInfo := sql.SelectUserInfo(username)
+
+	rdb := utils.ConnectRedis()
+	defer rdb.Close()
+
+	// 设置频率限制键
+	userRateLimitKey := fmt.Sprintf("discussionRateLimit:%d", userInfo.Uid)
+	exists, _ := rdb.Exists(userRateLimitKey).Result()
+	if exists == 1 {
+		c.JSON(http.StatusTooManyRequests, gin.H{"message": GetMessage(c, "rateLimit")})
+		return
+	}
+
+	// 设置限流键
+	rdb.Set(userRateLimitKey, 1, 15*time.Second)
+
+	// 创建讨论
+	uid := userInfo.Uid
 	if !sql.AddDiscussion(title, content, uid) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
 		return
 	}
+
 	c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 }
 

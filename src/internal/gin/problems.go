@@ -53,6 +53,7 @@ func GetProblemInfo(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"problemInfo": problemInfo})
 }
 
+// 提交代码
 func UploadCode(c *gin.Context) {
 	problem := c.Param("pid")
 	pidInt, _ := strconv.Atoi(problem)
