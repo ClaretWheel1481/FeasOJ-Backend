@@ -13,7 +13,7 @@ require (
 	github.com/nicksnyder/go-i18n/v2 v2.5.1
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/crypto v0.32.0
-	golang.org/x/text v0.21.0
+	golang.org/x/text v0.22.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gorm.io/driver/mysql v1.5.7
 	gorm.io/gorm v1.25.12
