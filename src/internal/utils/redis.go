@@ -8,7 +8,7 @@ import (
 	"github.com/go-redis/redis"
 )
 
-// 连接到Redis并返回redis.Client对象
+// ConnectRedis 连接到Redis并返回redis.Client对象
 func ConnectRedis() *redis.Client {
 	config := config.LoadRedisConfig()
 	rdb := redis.NewClient(&redis.Options{
@@ -19,7 +19,7 @@ func ConnectRedis() *redis.Client {
 	return rdb
 }
 
-// 数据缓存
+// SetCache 数据缓存
 func SetCache(key string, value interface{}, expiration time.Duration) error {
 	jsonData, err := json.Marshal(value)
 	if err != nil {
@@ -28,7 +28,7 @@ func SetCache(key string, value interface{}, expiration time.Duration) error {
 	return ConnectRedis().Set(key, jsonData, expiration).Err()
 }
 
-// 获取缓存
+// GetCache 获取缓存
 func GetCache(key string, dest interface{}) error {
 	val, err := ConnectRedis().Get(key).Result()
 	if err == redis.Nil {
@@ -37,9 +37,4 @@ func GetCache(key string, dest interface{}) error {
 		return err
 	}
 	return json.Unmarshal([]byte(val), dest)
-}
-
-// 删除缓存
-func DeleteCache(key string) error {
-	return ConnectRedis().Del(key).Err()
 }
