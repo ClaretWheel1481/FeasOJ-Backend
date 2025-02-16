@@ -15,5 +15,6 @@
   "userAlreadyExists": "ユーザーがすでに存在します",
   "competition_started": "あなたがエントリーした大会が始まりました。",
   "problem_completed": "問題{{.PID}}が完了しました！",
-  "competition_scored": "コンペティションは採点された。"
+  "competition_scored": "コンペティションは採点された。",
+  "profanity": "不適切な言葉は使用できません。"
 }

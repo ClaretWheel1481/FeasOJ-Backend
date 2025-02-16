@@ -26,6 +26,10 @@ func Register(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "userAlreadyinUse")})
 		return
 	}
+	if utils.ContainsProfanity(req.Username) {
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "profanity")})
+		return
+	}
 	vcodeStatus := utils.CompareVerifyCode(req.Vcode, req.Email)
 	if !vcodeStatus {
 		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "captchaError")})
@@ -155,6 +159,10 @@ func UpdateSynopsis(c *gin.Context) {
 	encodedUsername := c.GetHeader("Username")
 	username, _ := url.QueryUnescape(encodedUsername)
 	// 更新简介
+	if utils.ContainsProfanity(synopsis) {
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "profanity")})
+		return
+	}
 	if sql.UpdateSynopsis(username, synopsis) {
 		c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 	} else {

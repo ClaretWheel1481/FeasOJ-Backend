@@ -57,6 +57,10 @@ func CreateDiscussion(c *gin.Context) {
 
 	// 创建讨论
 	uid := userInfo.Uid
+	if utils.ContainsProfanity(title) || utils.ContainsProfanity(content) {
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "profanity")})
+		return
+	}
 	if !sql.AddDiscussion(title, content, uid) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
 		return
@@ -99,8 +103,13 @@ func AddComment(c *gin.Context) {
 	did, _ := strconv.Atoi(c.Param("did"))
 	// 获取用户ID
 	userInfo := sql.SelectUserInfo(username)
+	if utils.ContainsProfanity(content) {
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "profanity")})
+		return
+	}
 	if !sql.AddComment(content, did, userInfo.Uid) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "failed")})
+		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 }

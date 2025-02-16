@@ -114,7 +114,7 @@ func CompileAndRun(filename string, containerID string) string {
 
 	switch ext {
 	case ".cpp":
-		compileCmd = exec.Command("docker", "exec", containerID, "sh", "-c", fmt.Sprintf("g++ /workspace/%s -o /workspace/a.out", filename))
+		compileCmd = exec.Command("docker", "exec", containerID, "sh", "-c", fmt.Sprintf("g++ /workspace/%s -o /workspace/%s.out", filename, filename))
 		if err := compileCmd.Run(); err != nil {
 			TerminateContainer(containerID)
 			return "Compile Failed"
@@ -122,7 +122,7 @@ func CompileAndRun(filename string, containerID string) string {
 	case ".java":
 		// 临时重命名为Main.java
 		originalName := filename
-		tempName := "Main.java"
+		tempName := "Main_" + filename + ".java"
 		renameCmd := exec.Command("docker", "exec", containerID, "sh", "-c", fmt.Sprintf("mv /workspace/%s /workspace/%s", originalName, tempName))
 		if err := renameCmd.Run(); err != nil {
 			TerminateContainer(containerID)
@@ -154,13 +154,13 @@ func CompileAndRun(filename string, containerID string) string {
 		var runCmd *exec.Cmd
 		switch ext {
 		case ".cpp":
-			runCmd = exec.CommandContext(ctx, "docker", "exec", "-i", containerID, "sh", "-c", "/workspace/a.out")
+			runCmd = exec.CommandContext(ctx, "docker", "exec", "-i", containerID, "sh", "-c", fmt.Sprintf("/workspace/%s.out", filename))
 		case ".py":
 			runCmd = exec.CommandContext(ctx, "docker", "exec", "-i", containerID, "sh", "-c", fmt.Sprintf("python /workspace/%s", filename))
 		case ".go":
 			runCmd = exec.CommandContext(ctx, "docker", "exec", "-i", containerID, "sh", "-c", fmt.Sprintf("go run /workspace/%s", filename))
 		case ".java":
-			runCmd = exec.CommandContext(ctx, "docker", "exec", "-i", containerID, "sh", "-c", "java Main")
+			runCmd = exec.CommandContext(ctx, "docker", "exec", "-i", containerID, "sh", "-c", fmt.Sprintf("java Main_%s", filename))
 		default:
 			TerminateContainer(containerID)
 			return "Failed"

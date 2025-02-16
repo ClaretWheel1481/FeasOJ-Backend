@@ -15,5 +15,6 @@
   "userAlreadyExists": "Utente già esistente",
   "competition_started": "Il concorso a cui avete partecipato è iniziato.",
   "problem_completed": "Problema {{.PID}} completato!",
-  "competition_scored": "La gara è stata segnata."
+  "competition_scored": "La gara è stata segnata.",
+  "profanity": "Non sono ammesse parole offensive."
 }

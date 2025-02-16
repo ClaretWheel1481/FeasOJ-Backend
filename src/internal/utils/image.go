@@ -9,7 +9,7 @@ import (
 	"github.com/nfnt/resize"
 )
 
-// 压缩图像为128*128
+// 压缩图像为256*256
 func CompressImage(inputPath, outputPath string) error {
 	// 打开图像文件
 	file, err := os.Open(inputPath)
@@ -26,7 +26,7 @@ func CompressImage(inputPath, outputPath string) error {
 		return errors.New("unsupported image format")
 	}
 
-	newImage := resize.Resize(128, 128, img, resize.Lanczos3)
+	newImage := resize.Resize(256, 256, img, resize.Lanczos3)
 
 	out, err := os.Create(outputPath)
 	if err != nil {
