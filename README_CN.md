@@ -11,6 +11,7 @@ FeasOJ 是一个基于 Vue 和 Golang 的在线编程练习平台，支持多国
 <br>
 [FeasOJ-Frontend](https://github.com/ClaretWheel1481/FeasOJ)
 [ImageGuard](https://github.com/ClaretWheel1481/ImageGuard)
+[Profanity Detector](https://github.com/ClaretWheel1481/ProfanityDetector)
 [API Document(CN)](https://claret-feasoj.apifox.cn)
 [API Document(EN)](https://claret-feasoj.apifox.cn/en/)
 
