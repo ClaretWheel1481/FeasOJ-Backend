@@ -78,6 +78,7 @@ type CommentRequest struct {
 	Username  string `json:"username"`
 	Avatar    string `json:"avatar"`
 	Create_at string `json:"create_at"`
+	Profanity bool   `json:"profanity"`
 }
 
 // 用户信息请求体
@@ -230,6 +231,7 @@ type Comment struct {
 	Content   string    `gorm:"comment:内容;not null"`
 	Uid       int       `gorm:"comment:用户;not null"`
 	Create_at time.Time `gorm:"comment:创建时间;not null"`
+	Profanity bool      `gorm:"comment:适合展示;not null"`
 }
 
 // 测试样例表: Tid, Pid, InputData, OutputData

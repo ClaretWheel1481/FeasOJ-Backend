@@ -38,6 +38,12 @@ func CreateDiscussion(c *gin.Context) {
 	title := c.PostForm("title")
 	content := c.PostForm("content")
 
+	// 检测文本
+	if utils.DetectText(title) || utils.DetectText(content) {
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "profanity")})
+		return
+	}
+
 	// 获取用户ID
 	userInfo := sql.SelectUserInfo(username)
 
@@ -57,10 +63,7 @@ func CreateDiscussion(c *gin.Context) {
 
 	// 创建讨论
 	uid := userInfo.Uid
-	if utils.ContainsProfanity(title) || utils.ContainsProfanity(content) {
-		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "profanity")})
-		return
-	}
+
 	if !sql.AddDiscussion(title, content, uid) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
 		return
@@ -103,11 +106,11 @@ func AddComment(c *gin.Context) {
 	did, _ := strconv.Atoi(c.Param("did"))
 	// 获取用户ID
 	userInfo := sql.SelectUserInfo(username)
-	if utils.ContainsProfanity(content) {
-		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "profanity")})
-		return
+	profanity := false
+	if utils.DetectText(content) {
+		profanity = true
 	}
-	if !sql.AddComment(content, did, userInfo.Uid) {
+	if !sql.AddComment(content, did, userInfo.Uid, profanity) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "failed")})
 		return
 	}

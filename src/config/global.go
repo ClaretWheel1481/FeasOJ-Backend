@@ -20,7 +20,10 @@ const ServerCertPath = "./certificate/fullchain.pem"
 const ServerKeyPath = "./certificate/privkey.key"
 
 // ImageGuardAddress ImageGuard微服务地址
-const ImageGuardAddress = "http://127.0.0.1:37882/api/v1/predict"
+const ImageGuardAddress = "http://127.0.0.1:37882/api/v1/image/predict"
+
+// ProfanityDetectorAddress ProfanityDetector微服务地址
+const ProfanityDetectorAddress = "http://127.0.0.1:37883/api/v1/text/predict"
 
 /////////////////////////////////////////// MySQL配置 //////////////////////////////////////////////
 

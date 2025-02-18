@@ -48,15 +48,15 @@ func DelDiscussion(Did int) bool {
 }
 
 // 添加评论
-func AddComment(content string, did, uid int) bool {
-	return utils.ConnectSql().Table("Comments").Create(&global.Comment{Did: did, Uid: uid, Content: content, Create_at: time.Now()}).Error == nil
+func AddComment(content string, did, uid int, profanity bool) bool {
+	return utils.ConnectSql().Table("Comments").Create(&global.Comment{Did: did, Uid: uid, Content: content, Create_at: time.Now(), Profanity: profanity}).Error == nil
 }
 
 // 获取指定讨论ID的所有评论信息
 func SelectCommentsByDid(Did int) []global.CommentRequest {
 	var comments []global.CommentRequest
 	utils.ConnectSql().Table("Comments").
-		Select("Comments.Cid, Comments.Did, Comments.Content, Comments.Create_at, Users.Uid,Users.Username, Users.Avatar").
+		Select("Comments.Cid, Comments.Did, Comments.Content, Comments.Create_at, Users.Uid,Users.Username, Users.Avatar,Comments.Profanity").
 		Joins("JOIN Users ON Comments.Uid = Users.Uid").
 		Order("create_at desc").
 		Where("Comments.Did = ?", Did).Find(&comments)

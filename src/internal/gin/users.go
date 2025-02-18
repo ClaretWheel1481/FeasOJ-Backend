@@ -26,7 +26,7 @@ func Register(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "userAlreadyinUse")})
 		return
 	}
-	if utils.ContainsProfanity(req.Username) {
+	if utils.DetectText(req.Username) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "profanity")})
 		return
 	}
@@ -159,7 +159,7 @@ func UpdateSynopsis(c *gin.Context) {
 	encodedUsername := c.GetHeader("Username")
 	username, _ := url.QueryUnescape(encodedUsername)
 	// 更新简介
-	if utils.ContainsProfanity(synopsis) {
+	if utils.DetectText(synopsis) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "profanity")})
 		return
 	}
