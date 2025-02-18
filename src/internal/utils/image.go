@@ -1,10 +1,16 @@
 package utils
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"image"
 	"image/png"
+	"io"
+	"mime/multipart"
+	"net/http"
 	"os"
+	"src/config"
 
 	"github.com/nfnt/resize"
 )
@@ -38,4 +44,47 @@ func CompressImage(inputPath, outputPath string) error {
 	return err
 }
 
-// TODO: 判断图片是否违规
+// 判断图片是否违规
+func PredictImage(imagePath string) bool {
+	// 打开图片文件
+	file, err := os.Open(imagePath)
+	if err != nil {
+		return false
+	}
+	defer file.Close()
+
+	var buf bytes.Buffer
+	writer := multipart.NewWriter(&buf)
+	part, err := writer.CreateFormFile("file", imagePath)
+	if err != nil {
+		return false
+	}
+	if _, err = io.Copy(part, file); err != nil {
+		return false
+	}
+	if err = writer.Close(); err != nil {
+		return false
+	}
+
+	req, err := http.NewRequest("POST", config.ImageGuardAddress, &buf)
+	if err != nil {
+		return false
+	}
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return false
+	}
+	defer resp.Body.Close()
+
+	var result struct {
+		Prediction string `json:"prediction"`
+		Error      string `json:"error,omitempty"`
+	}
+	if err = json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return false
+	}
+
+	// 返回 true 表示预测结果为 "neutral"
+	return result.Prediction == "neutral"
+}

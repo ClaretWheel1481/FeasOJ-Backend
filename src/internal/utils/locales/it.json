@@ -16,5 +16,6 @@
   "competition_started": "Il concorso a cui avete partecipato è iniziato.",
   "problem_completed": "Problema {{.PID}} completato!",
   "competition_scored": "La gara è stata segnata.",
-  "profanity": "Non sono ammesse parole offensive."
+  "profanity": "Non sono ammesse parole offensive.",
+  "illegalImage": "L'immagine contiene contenuti illegali."
 }

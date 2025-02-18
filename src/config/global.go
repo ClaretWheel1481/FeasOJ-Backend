@@ -19,6 +19,9 @@ const ServerCertPath = "./certificate/fullchain.pem"
 // ServerKeyPath 服务器私钥路径(./certificate/privkey.key)
 const ServerKeyPath = "./certificate/privkey.key"
 
+// ImageGuardAddress ImageGuard微服务地址
+const ImageGuardAddress = "http://127.0.0.1:37882/api/v1/predict"
+
 /////////////////////////////////////////// MySQL配置 //////////////////////////////////////////////
 
 // MaxOpenConns MySQL最大连接数

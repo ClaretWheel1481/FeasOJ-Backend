@@ -185,24 +185,37 @@ func UploadAvatar(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "invalidrequest")})
 		return
 	}
-	newFilename := fmt.Sprintf("%d%s", userInfo.Uid, path.Ext(file.Filename))
-	originalFilePath := filepath.Join(global.AvatarsDir, newFilename)
+	newFileName := fmt.Sprintf("%d%s", userInfo.Uid, path.Ext(file.Filename))
+	tempFilePath := filepath.Join(global.AvatarsDir, newFileName)
 	compressedFilePath := filepath.Join(global.AvatarsDir, fmt.Sprintf("%d%s", userInfo.Uid, path.Ext(file.Filename)))
 	if _, err := os.Stat(compressedFilePath); err == nil {
 		os.Remove(compressedFilePath)
 	}
-	// 保存原始文件
-	if err := c.SaveUploadedFile(file, originalFilePath); err != nil {
+	// 保存临时文件
+	if err := c.SaveUploadedFile(file, tempFilePath); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
 		return
 	}
+	// 检测图像，若违规则删除
+	if !utils.PredictImage(tempFilePath) {
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "illegalImage")})
+
+		// 删除图像
+		if err := os.Remove(tempFilePath); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
+			return
+		}
+		return
+	}
+
 	// 压缩图像
-	if err := utils.CompressImage(originalFilePath, compressedFilePath); err != nil {
+	if err := utils.CompressImage(tempFilePath, compressedFilePath); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
 		return
 	}
+
 	// 上传压缩后的头像路径至数据库
-	if !sql.UpdateAvatar(username, newFilename) {
+	if !sql.UpdateAvatar(username, newFileName) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
 		return
 	}

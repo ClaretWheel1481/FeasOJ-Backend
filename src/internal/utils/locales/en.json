@@ -16,5 +16,6 @@
   "competition_started": "The competition you entered has started.",
   "problem_completed": "Problem {{.PID}} completed!",
   "competition_scored": "Competition has been scored.",
-  "profanity": "Profanity detected."
+  "profanity": "Profanity detected.",
+  "illegalImage": "Illegal image detected."
 }

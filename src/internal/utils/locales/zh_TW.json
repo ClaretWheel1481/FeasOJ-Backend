@@ -16,5 +16,6 @@
   "competition_started": "您參加的比賽已經開始。",
   "problem_completed": "題目 {{.PID}} 已完成！",
   "competition_scored": "比賽得分已計算！",
-  "profanity": "監測到不允許的語言。"
+  "profanity": "監測到不允許的語言。",
+  "illegalImage": "圖片包含非法內容。"
 }
