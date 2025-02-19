@@ -107,83 +107,108 @@ func StartContainer() (string, error) {
 	return resp.ID, nil
 }
 
-// CompileAndRun 启动容器并编译运行文件、放入输入、捕获输出、对照输出
+// ResetContainer 只清理任务专属的目录，而不影响其他任务
+func ResetContainer(containerID, taskDir string) error {
+	resetCmd := exec.Command("docker", "exec", containerID, "sh", "-c", fmt.Sprintf("rm -rf %s", taskDir))
+	if err := resetCmd.Run(); err != nil {
+		log.Printf("[ResetContainer] Error cleaning task directory %s in container %s: %v", taskDir, containerID, err)
+		return err
+	}
+	return nil
+}
+
+// CompileAndRun 编译并运行代码
 func CompileAndRun(filename string, containerID string) string {
+	// 生成唯一任务目录（使用当前时间戳纳秒值）
+	taskDir := fmt.Sprintf("/workspace/task_%d", time.Now().UnixNano())
+
+	// 在容器内创建任务目录
+	mkdirCmd := exec.Command("docker", "exec", containerID, "mkdir", "-p", taskDir)
+	if err := mkdirCmd.Run(); err != nil {
+		return "Internal Error: cannot create task dir"
+	}
+
+	// 将代码文件从挂载的workspace目录复制到任务目录中
+	copyCmd := exec.Command("docker", "exec", containerID, "cp", fmt.Sprintf("/workspace/%s", filename), taskDir)
+	if err := copyCmd.Run(); err != nil {
+		return "Internal Error: cannot copy file"
+	}
+
+	// 确保任务结束后清理任务目录
+	defer func() {
+		if err := ResetContainer(containerID, taskDir); err != nil {
+			log.Printf("Reset task dir %s error: %v", taskDir, err)
+		}
+	}()
+
 	ext := filepath.Ext(filename)
 	var compileCmd *exec.Cmd
 
 	switch ext {
 	case ".cpp":
-		compileCmd = exec.Command("docker", "exec", containerID, "sh", "-c", fmt.Sprintf("g++ /workspace/%s -o /workspace/%s.out", filename, filename))
+		compileCmd = exec.Command("docker", "exec", containerID, "sh", "-c",
+			fmt.Sprintf("g++ %s/%s -o %s/%s.out", taskDir, filename, taskDir, filename))
 		if err := compileCmd.Run(); err != nil {
-			TerminateContainer(containerID)
 			return "Compile Failed"
 		}
 	case ".java":
-		// 临时重命名为Main.java
-		originalName := filename
-		tempName := "Main_" + filename + ".java"
-		renameCmd := exec.Command("docker", "exec", containerID, "sh", "-c", fmt.Sprintf("mv /workspace/%s /workspace/%s", originalName, tempName))
+		renameCmd := exec.Command("docker", "exec", containerID, "sh", "-c",
+			fmt.Sprintf("mv %s/%s %s/Main.java", taskDir, filename, taskDir))
 		if err := renameCmd.Run(); err != nil {
-			TerminateContainer(containerID)
 			return "Compile Failed"
 		}
-
-		compileCmd = exec.Command("docker", "exec", containerID, "sh", "-c", fmt.Sprintf("javac /workspace/%s", tempName))
+		// 编译Java代码
+		compileCmd = exec.Command("docker", "exec", containerID, "sh", "-c",
+			fmt.Sprintf("javac %s/Main.java", taskDir))
 		if err := compileCmd.Run(); err != nil {
-			TerminateContainer(containerID)
 			return "Compile Failed"
 		}
+	default:
 
-		// 编译完成后改回原名
-		renameBackCmd := exec.Command("docker", "exec", containerID, "sh", "-c", fmt.Sprintf("mv /workspace/%s /workspace/%s", tempName, originalName))
-		if err := renameBackCmd.Run(); err != nil {
-			TerminateContainer(containerID)
-			return "Compile Failed"
-		}
 	}
 
-	// 设置超时上下文
+	// 设置超时上下文用于运行测试用例
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	// 两种方案：1、数据库存放输入输出样例 2、in，out文件存放输入输出样例，数据库存放对应文件路径
-	// 数据库获取输入输出样例
+	// 从数据库中获取输入输出样例
 	testCases := sql.SelectTestCasesByPid(strings.Split(filename, "_")[1])
 	for _, testCase := range testCases {
 		var runCmd *exec.Cmd
 		switch ext {
 		case ".cpp":
-			runCmd = exec.CommandContext(ctx, "docker", "exec", "-i", containerID, "sh", "-c", fmt.Sprintf("/workspace/%s.out", filename))
+			// 执行编译生成的C++可执行文件
+			runCmd = exec.CommandContext(ctx, "docker", "exec", "-i", containerID, "sh", "-c",
+				fmt.Sprintf("%s/%s.out", taskDir, filename))
 		case ".py":
-			runCmd = exec.CommandContext(ctx, "docker", "exec", "-i", containerID, "sh", "-c", fmt.Sprintf("python /workspace/%s", filename))
+			runCmd = exec.CommandContext(ctx, "docker", "exec", "-i", containerID, "sh", "-c",
+				fmt.Sprintf("python %s/%s", taskDir, filename))
 		case ".go":
-			runCmd = exec.CommandContext(ctx, "docker", "exec", "-i", containerID, "sh", "-c", fmt.Sprintf("go run /workspace/%s", filename))
+			runCmd = exec.CommandContext(ctx, "docker", "exec", "-i", containerID, "sh", "-c",
+				fmt.Sprintf("go run %s/%s", taskDir, filename))
 		case ".java":
-			runCmd = exec.CommandContext(ctx, "docker", "exec", "-i", containerID, "sh", "-c", fmt.Sprintf("java Main_%s", filename))
+			// 运行Java程序：指定任务目录作为classpath，执行Main类
+			runCmd = exec.CommandContext(ctx, "docker", "exec", "-i", containerID, "sh", "-c",
+				fmt.Sprintf("java -cp %s Main", taskDir))
 		default:
-			TerminateContainer(containerID)
 			return "Failed"
 		}
 
+		// 将测试用例的输入数据传入命令
 		runCmd.Stdin = strings.NewReader(testCase.InputData)
 		output, err := runCmd.CombinedOutput()
 		if ctx.Err() == context.DeadlineExceeded {
-			TerminateContainer(containerID)
 			return "Time Limit Exceeded"
 		}
 		if err != nil {
-			TerminateContainer(containerID)
 			return "Failed"
 		}
 		outputStr := string(output)
 		if strings.TrimSpace(outputStr) != strings.TrimSpace(testCase.OutputData) {
-			TerminateContainer(containerID)
 			return "Wrong Answer"
 		}
 	}
-	// TODO: 第二种方案，读取in，out文件
-	TerminateContainer(containerID)
+
 	return "Success"
 }
 

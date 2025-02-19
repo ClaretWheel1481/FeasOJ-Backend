@@ -45,5 +45,5 @@ var SandBoxConfig = container.Resources{
 	CPUShares: 1024,              // CPU权重，默认为1024，越高优先级越高
 }
 
-// MaxWorkers SandBox最大并发数
-const MaxWorkers = 5
+// MaxSandbox SandBox最大并发数
+const MaxSandbox = 5

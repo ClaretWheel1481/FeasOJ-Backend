@@ -24,15 +24,20 @@ type Task struct {
 	Name string
 }
 
+// ProcessJudgeTasks 函数用于处理判题任务
 func ProcessJudgeTasks(rdb *redis.Client) {
+	// 创建一个任务通道
 	taskChan := make(chan Task)
+	// 创建一个等待组
 	var wg sync.WaitGroup
 
-	for i := 0; i < config.MaxWorkers; i++ {
+	// 创建多个worker协程
+	for i := 0; i < config.MaxSandbox; i++ {
 		wg.Add(1)
 		go worker(taskChan, &wg)
 	}
 
+	// 无限循环，从Redis任务队列中取出任务
 	for {
 		// 从Redis任务队列中取出一个任务
 		task, err := rdb.LPop("judgeTask").Result()
@@ -44,9 +49,11 @@ func ProcessJudgeTasks(rdb *redis.Client) {
 			log.Panic("[FeasOJ] Redis connect error: ", err)
 		}
 
+		// 将任务分割成用户ID和题目ID
 		parts := strings.Split(task, "_")
 		uid := parts[0]
 		pid := strings.Split(parts[1], ".")[0]
+		// 将用户ID和题目ID转换为整数
 		uidInt, err := strconv.Atoi(uid)
 		if err != nil {
 			log.Panic(err)
@@ -56,42 +63,48 @@ func ProcessJudgeTasks(rdb *redis.Client) {
 			log.Panic(err)
 		}
 
+		// 将任务发送到任务通道
 		taskChan <- Task{UID: uidInt, PID: pidInt, Name: task}
 	}
 }
 
-// 并发处理
+// worker 使用容器池执行任务
 func worker(taskChan chan Task, wg *sync.WaitGroup) {
+	// 使用 defer 关键字，在函数结束时调用 wg.Done()，表示任务完成
 	defer wg.Done()
+	// 从任务通道中获取任务
 	for task := range taskChan {
-		containerID, err := StartContainer()
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-		// 存储任务的容器ID
+		// 从容器池中获取一个空闲容器
+		containerID := AcquireContainer()
+		// 将容器ID存储到全局变量中
 		global.ContainerIDs.Store(task.Name, containerID)
-		str := CompileAndRun(task.Name, containerID)
+		// 执行编译与运行
+		result := CompileAndRun(task.Name, containerID)
+		// 更新判题状态
+		sql.ModifyJudgeStatus(task.UID, task.PID, result)
 
-		// 终止任务对应的容器
-		TerminateContainer(containerID)
-
-		// 将结果从数据库中修改
-		sql.ModifyJudgeStatus(task.UID, task.PID, str)
-
-		// 发送SSE通知
+		// 发送 SSE 通知
 		if client, ok := gincontext.Clients[fmt.Sprint(task.UID)]; ok {
+			// 获取客户端的语言
 			lang := client.Lang
+			// 将语言转换为语言标签
 			tag := language.Make(lang)
+			// 初始化国际化
 			langBundle := utils.InitI18n()
+			// 创建本地化器
 			localizer := i18n.NewLocalizer(langBundle, tag.String())
+			// 本地化消息
 			message, _ := localizer.Localize(&i18n.LocalizeConfig{
 				MessageID: "problem_completed",
 				TemplateData: map[string]interface{}{
 					"PID": task.PID,
 				},
 			})
+			// 将消息发送到客户端的消息通道中
 			client.MessageChan <- message
 		}
+
+		// 将容器归还到池中（内部会先重置环境）
+		ReleaseContainer(containerID)
 	}
 }

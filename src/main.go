@@ -112,6 +112,8 @@ func main() {
 	// 挂载文档文件夹
 	r.StaticFS("/api/v1/docs", http.Dir(global.DocsDir))
 
+	judge.InitializeContainerPool(config.MaxSandbox)
+
 	// 实时检测Redis JudgeTask中是否有任务
 	rdb := utils.ConnectRedis()
 	go judge.ProcessJudgeTasks(rdb)
@@ -158,5 +160,6 @@ func main() {
 
 	// 关闭服务器前的清理工作
 	log.Println("[FeasOJ] The server is shutting down...")
+	judge.ShutdownContainerPool()
 	utils.CloseLogger(logFile)
 }
