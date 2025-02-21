@@ -44,7 +44,17 @@ func CompressImage(inputPath, outputPath string) error {
 	return err
 }
 
-// 判断图片是否违规
+// ImageGuardPing 检查服务是否可用
+func ImageGuardPing() bool {
+	resp, err := http.Get(config.ImageGuardAddress)
+	if err != nil {
+		return false
+	}
+	defer resp.Body.Close()
+	return resp.StatusCode == http.StatusOK
+}
+
+// PredictImage 判断图片是否违规
 func PredictImage(imagePath string) bool {
 	// 打开图片文件
 	file, err := os.Open(imagePath)

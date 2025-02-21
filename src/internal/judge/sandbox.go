@@ -91,6 +91,7 @@ func StartContainer() (string, error) {
 			global.CodeDir + ":/workspace", // 挂载文件夹
 		},
 		AutoRemove: true, // 容器退出后自动删除
+		CapDrop:    []string{"ALL"},
 	}
 
 	// 创建容器

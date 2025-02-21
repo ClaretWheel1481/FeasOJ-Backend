@@ -90,6 +90,22 @@ func main() {
 		log.Println("[FeasOJ] Redis connection successful.")
 	}
 
+	// 测试ImageGuard连接
+	if utils.ImageGuardPing() {
+		log.Println("[FeasOJ] ImageGuard service connection successful.")
+	} else {
+		log.Println("[FeasOJ] ImageGuard service connection failed, please check /src/config/global.go")
+		return
+	}
+
+	// 测试ProfanityDetector连接
+	if utils.ProfanityDetectorPing() {
+		log.Println("[FeasOJ] ProfanityDetector service connection successful.")
+	} else {
+		log.Println("[FeasOJ] ProfanityDetector service connection failed, please check /src/config/global.go")
+		return
+	}
+
 	// 构建沙盒镜像
 	if judge.BuildImage() {
 		log.Println("[FeasOJ] SandBox builds successfully.")

@@ -3,7 +3,7 @@ package utils
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"src/config"
 )
@@ -40,7 +40,7 @@ func DetectText(text string) bool {
 		return true
 	}
 
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return true
 	}
@@ -56,4 +56,14 @@ func DetectText(text string) bool {
 		return false
 	}
 	return true
+}
+
+// ProfanityDetectorPing 检查服务是否可用
+func ProfanityDetectorPing() bool {
+	resp, err := http.Get(config.ProfanityDetectorAddress)
+	if err != nil {
+		return false
+	}
+	defer resp.Body.Close()
+	return resp.StatusCode == http.StatusOK
 }
