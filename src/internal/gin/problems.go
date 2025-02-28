@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"src/internal/global"
 	"src/internal/utils"
+	"src/internal/utils/rabbitmq"
 	"src/internal/utils/sql"
 	"strconv"
 	"time"
@@ -25,7 +26,7 @@ func GetAllProblems(c *gin.Context) {
 // 获取题目信息
 func GetProblemInfo(c *gin.Context) {
 	pid, _ := strconv.Atoi(c.Param("id"))
-	if sql.IsProblemVisible(pid) == false {
+	if !sql.IsProblemVisible(pid) {
 		c.JSON(http.StatusForbidden, gin.H{"message": GetMessage(c, "forbidden")})
 		return
 	}
@@ -68,6 +69,15 @@ func UploadCode(c *gin.Context) {
 	// 获取用户ID
 	userInfo := sql.SelectUserInfo(username)
 
+	// 连接到 RabbitMQ
+	conn, ch, err := rabbitmq.ConnectRabbitMQ()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
+		return
+	}
+	defer conn.Close()
+	defer ch.Close()
+
 	rdb := utils.ConnectRedis()
 	defer rdb.Close()
 
@@ -108,8 +118,8 @@ func UploadCode(c *gin.Context) {
 		language = "Unknown"
 	}
 
-	// 上传任务至Redis任务队列
-	err = rdb.RPush("judgeTask", newFileName).Err()
+	// 将任务发送到RabbitMQ
+	err = rabbitmq.PublishTask(ch, newFileName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
 		return

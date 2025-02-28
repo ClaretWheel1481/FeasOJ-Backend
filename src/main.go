@@ -68,31 +68,31 @@ func main() {
 
 	// 初始化管理员账户
 	if sql.SelectAdminUser(1) {
-		log.Println("[FeasOJ] The administrator account already exists and will continue.")
+		log.Println("[FeasOJ] The administrator account already exists and will continue")
 	} else {
 		sql.Register(utils.InitAdminAccount())
 	}
-	log.Println("[FeasOJ] MySQL initialization complete.")
+	log.Println("[FeasOJ] MySQL initialization complete")
 
 	// 测试邮箱模块是否正常
 	if !utils.TestSend(config.InitEmailConfig()) {
-		log.Println("[FeasOJ] Email service startup failed, please check the configuration.")
+		log.Println("[FeasOJ] Email service startup failed, please check the configuration")
 		return
 	} else {
-		log.Println("[FeasOJ] Email service initialization complete.")
+		log.Println("[FeasOJ] Email service initialization complete")
 	}
 
 	// 测试Redis连接
 	if utils.ConnectRedis() == nil {
-		log.Println("[FeasOJ] Redis connection failed, please check the configuration.")
+		log.Println("[FeasOJ] Redis connection failed, please check the configuration")
 		return
 	} else {
-		log.Println("[FeasOJ] Redis connection successful.")
+		log.Println("[FeasOJ] Redis connection successful")
 	}
 
 	// 测试ImageGuard连接
 	if utils.ImageGuardPing() {
-		log.Println("[FeasOJ] ImageGuard service connection successful.")
+		log.Println("[FeasOJ] ImageGuard service connection successful")
 	} else {
 		log.Println("[FeasOJ] ImageGuard service connection failed, please check /src/config/global.go")
 		return
@@ -100,7 +100,7 @@ func main() {
 
 	// 测试ProfanityDetector连接
 	if utils.ProfanityDetectorPing() {
-		log.Println("[FeasOJ] ProfanityDetector service connection successful.")
+		log.Println("[FeasOJ] ProfanityDetector service connection successful")
 	} else {
 		log.Println("[FeasOJ] ProfanityDetector service connection failed, please check /src/config/global.go")
 		return
@@ -108,9 +108,9 @@ func main() {
 
 	// 构建沙盒镜像
 	if judge.BuildImage() {
-		log.Println("[FeasOJ] SandBox builds successfully.")
+		log.Println("[FeasOJ] SandBox builds successfully")
 	} else {
-		log.Println("[FeasOJ] SandBox builds fail, please make sure Docker is running and up to date!")
+		log.Println("[FeasOJ] SandBox builds fail, please make sure Docker is running and up to date")
 		return
 	}
 
@@ -131,8 +131,10 @@ func main() {
 	judge.InitializeContainerPool(config.MaxSandbox)
 
 	// 实时检测Redis JudgeTask中是否有任务
-	rdb := utils.ConnectRedis()
-	go judge.ProcessJudgeTasks(rdb)
+	// rdb := utils.ConnectRedis()
+	// go judge.ProcessJudgeTasks(rdb)
+
+	go judge.ProcessJudgeTasks()
 
 	startServer := func(protocol, address, certFile, keyFile string) {
 		for {
@@ -162,7 +164,7 @@ func main() {
 		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
 			if scanner.Text() == "quit" {
-				log.Println("[FeasOJ] The server is being shut down....")
+				log.Println("[FeasOJ] The server is being shut down, please be patient to wait for the container to be closed")
 				os.Exit(0)
 			}
 		}
@@ -171,11 +173,11 @@ func main() {
 	// 等待中断信号关闭服务器
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	log.Println("[FeasOJ] Input 'quit' or Ctrl+C to stop the server.")
+	log.Println("[FeasOJ] Input 'quit' or Ctrl+C to stop the server")
 	<-quit
 
 	// 关闭服务器前的清理工作
-	log.Println("[FeasOJ] The server is shutting down...")
+	log.Println("[FeasOJ] The server is shutting down, please be patient to wait for the container to be closed")
 	judge.ShutdownContainerPool()
 	utils.CloseLogger(logFile)
 }

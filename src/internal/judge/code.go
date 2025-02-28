@@ -2,20 +2,19 @@ package judge
 
 import (
 	"fmt"
-	"github.com/nicksnyder/go-i18n/v2/i18n"
-	"golang.org/x/text/language"
 	"log"
 	"src/config"
 	gincontext "src/internal/gin"
 	"src/internal/global"
 	"src/internal/utils"
+	"src/internal/utils/rabbitmq"
 	"src/internal/utils/sql"
 	"strconv"
 	"strings"
 	"sync"
-	"time"
 
-	"github.com/go-redis/redis"
+	"github.com/nicksnyder/go-i18n/v2/i18n"
+	"golang.org/x/text/language"
 )
 
 type Task struct {
@@ -25,32 +24,47 @@ type Task struct {
 }
 
 // ProcessJudgeTasks 函数用于处理判题任务
-func ProcessJudgeTasks(rdb *redis.Client) {
+func ProcessJudgeTasks() {
+	// 连接到 RabbitMQ
+	conn, ch, err := rabbitmq.ConnectRabbitMQ()
+	if err != nil {
+		log.Println("[FeasOJ] RabbitMQ connect error: ", err)
+		return
+	}
+	log.Println("[FeasOJ] RabbitMQ connected")
+	defer conn.Close()
+	defer ch.Close()
+
 	// 创建一个任务通道
 	taskChan := make(chan Task)
 	// 创建一个等待组
 	var wg sync.WaitGroup
 
-	// 创建多个worker协程
-	for i := 0; i < config.MaxSandbox; i++ {
+	// 创建多个 worker 协程
+	for range config.MaxSandbox {
 		wg.Add(1)
 		go worker(taskChan, &wg)
 	}
 
-	// 无限循环，从Redis任务队列中取出任务
-	for {
-		// 从Redis任务队列中取出一个任务
-		task, err := rdb.LPop("judgeTask").Result()
-		if err == redis.Nil {
-			// 如果队列为空，等待一段时间后再检查
-			time.Sleep(2 * time.Second)
-			continue
-		} else if err != nil {
-			log.Panic("[FeasOJ] Redis connect error: ", err)
-		}
+	// 获取队列中的任务
+	msgs, err := ch.Consume(
+		"judgeTask", // 队列名称
+		"",          // 消费者标签
+		true,        // 自动应答
+		false,       // 是否排他
+		false,       // 是否持久化
+		false,       // 是否等待
+		nil,         // 额外参数
+	)
+	if err != nil {
+		log.Panic("[FeasOJ] Failed to start consuming: ", err)
+	}
 
+	// 无限循环处理任务
+	for msg := range msgs {
+		taskData := string(msg.Body)
 		// 将任务分割成用户ID和题目ID
-		parts := strings.Split(task, "_")
+		parts := strings.Split(taskData, "_")
 		uid := parts[0]
 		pid := strings.Split(parts[1], ".")[0]
 		// 将用户ID和题目ID转换为整数
@@ -64,8 +78,11 @@ func ProcessJudgeTasks(rdb *redis.Client) {
 		}
 
 		// 将任务发送到任务通道
-		taskChan <- Task{UID: uidInt, PID: pidInt, Name: task}
+		taskChan <- Task{UID: uidInt, PID: pidInt, Name: taskData}
 	}
+
+	// 等待所有 worker 完成
+	wg.Wait()
 }
 
 // worker 使用容器池执行任务

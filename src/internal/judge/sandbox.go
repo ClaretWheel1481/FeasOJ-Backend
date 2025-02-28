@@ -112,7 +112,7 @@ func StartContainer() (string, error) {
 func ResetContainer(containerID, taskDir string) error {
 	resetCmd := exec.Command("docker", "exec", containerID, "sh", "-c", fmt.Sprintf("rm -rf %s", taskDir))
 	if err := resetCmd.Run(); err != nil {
-		log.Printf("[ResetContainer] Error cleaning task directory %s in container %s: %v", taskDir, containerID, err)
+		log.Printf("[FeasOJ] Error cleaning task directory %s in container %s: %v", taskDir, containerID, err)
 		return err
 	}
 	return nil
