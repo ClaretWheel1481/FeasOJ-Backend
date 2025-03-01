@@ -48,7 +48,7 @@ FeasOJ-Backend
 - Consul
 
 ### 如何运行
-1. 克隆此库以及[ImageGuard](https://github.com/ClaretWheel1481/ImageGuard)和[Profanity Detector](https://github.com/ClaretWheel1481/ProfanityDetector)
+1. 克隆此库以及[ImageGuard](https://github.com/ClaretWheel1481/ImageGuard)和[Profanity Detector](https://github.com/ClaretWheel1481/ProfanityDetector)以及[FeasOJ-JudgeCore](https://github.com/ClaretWheel1481/FeasOJ-JudgeCore)
 2. 安装 Docker、MySQL、Redis、Consul和RabbitMQ
 3. 运行 `MySQL`、`Redis`、`Docker`、`Consul`、`RabbitMQ`、`ImageGuard` 和 `Profanity Detector`
 4. 运行 `cd src` 和 `go mod tidy` 下载依赖

@@ -48,7 +48,7 @@ FeasOJ-Backend
 - Consul
 
 ### How to run
-1. Clone this repository and [ImageGuard](https://github.com/ClaretWheel1481/ImageGuard), [Profanity Detector](https://github.com/ClaretWheel1481/ProfanityDetector)
+1. Clone this repository and [ImageGuard](https://github.com/ClaretWheel1481/ImageGuard), [Profanity Detector](https://github.com/ClaretWheel1481/ProfanityDetector), and [FeasOJ-JudgeCore](https://github.com/ClaretWheel1481/FeasOJ-JudgeCore)
 2. Install Docker, RabbitMQ, Consul, Redis and MySQL
 3. Start `MySQL`, `Redis`, `Docker`, `Consul`, `RabbitMQ`, `ImageGuard`, `ProfanityDetector` Services
 4. Run `cd src` and `go mod tidy` Install dependencies
