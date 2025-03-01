@@ -27,10 +27,3 @@ func AddSubmitRecord(Uid, Pid int, Result, Language, Username string) bool {
 	err := utils.ConnectSql().Table("submit_records").Create(&global.SubmitRecord{Uid: Uid, Pid: Pid, Username: Username, Result: Result, Time: time.Now(), Language: Language})
 	return err == nil
 }
-
-// 修改提交记录状态
-func ModifyJudgeStatus(Uid, Pid int, Result string) bool {
-	// 将result为Running...的记录修改为返回状态
-	err := utils.ConnectSql().Table("submit_records").Where("uid = ? AND pid = ? AND result = ?", Uid, Pid, "Running...").Update("result", Result)
-	return err == nil
-}

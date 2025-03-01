@@ -4,18 +4,49 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"log"
 	"net/http"
 	"src/internal/config"
+	"src/internal/global"
+
+	"fmt"
+
+	"github.com/hashicorp/consul/api"
 )
 
-// PredictionResponse 定义了检测服务返回的 JSON 结构
+// PredictionResponse 定义检测服务返回的 JSON 结构
 type PredictionResponse struct {
 	Text       string `json:"text"`
 	Prediction string `json:"prediction"`
 }
 
-// DetectText 检测文字是否违规
-// 返回 true 表示合规（预测结果为 "normal"），返回 true 表示违规或检测过程中出错
+// 获取Profanity Detector服务地址
+func GetProfanityDetectorAddress() string {
+	consulConfig := api.DefaultConfig()
+	consulConfig.Address = config.ConsulAddress
+	consulClient, err := api.NewClient(consulConfig)
+	if err != nil {
+		log.Println("[FeasOJ] Error connecting to Consul:", err)
+		return ""
+	}
+
+	services, _, err := consulClient.Catalog().Service("ProfanityDetector", "", nil)
+	if err != nil {
+		log.Println("[FeasOJ] Error querying Consul:", err)
+		return ""
+	}
+
+	if len(services) == 0 {
+		log.Println("[FeasOJ] ProfanityDetector service not found in Consul")
+		return ""
+	}
+
+	service := services[0]
+	global.ProfanityDetectorAddr = "http://" + service.ServiceAddress + ":" + fmt.Sprint(service.ServicePort)
+	return "http://" + service.ServiceAddress + ":" + fmt.Sprint(service.ServicePort) + "/api/v1/text/predict"
+}
+
+// DetectText 检测文本是否包含敏感词汇
 func DetectText(text string) bool {
 	payload := map[string]string{"text": text}
 	payloadBytes, err := json.Marshal(payload)
@@ -23,7 +54,7 @@ func DetectText(text string) bool {
 		return true
 	}
 
-	req, err := http.NewRequest("POST", config.ProfanityDetectorAddress, bytes.NewBuffer(payloadBytes))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/api/v1/text/predict", global.ProfanityDetectorAddr), bytes.NewBuffer(payloadBytes))
 	if err != nil {
 		return true
 	}
@@ -60,10 +91,18 @@ func DetectText(text string) bool {
 
 // ProfanityDetectorPing 检查服务是否可用
 func ProfanityDetectorPing() bool {
-	resp, err := http.Get(config.ProfanityDetectorAddress)
+	profanityDetectorAddress := GetProfanityDetectorAddress()
+	if profanityDetectorAddress == "" {
+		log.Println("[FeasOJ] Unable to get ProfanityDetector address from Consul")
+		return false
+	}
+
+	resp, err := http.Get(profanityDetectorAddress)
 	if err != nil {
+		log.Println("[FeasOJ] Error requesting ProfanityDetector:", err)
 		return false
 	}
 	defer resp.Body.Close()
+
 	return resp.StatusCode == http.StatusOK
 }

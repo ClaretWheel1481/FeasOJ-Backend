@@ -1,9 +1,13 @@
 package gincontext
 
 import (
+	"bytes"
 	"fmt"
+	"io"
+	"mime/multipart"
 	"net/http"
 	"net/url"
+	"os"
 	"path"
 	"path/filepath"
 	"src/internal/global"
@@ -93,13 +97,19 @@ func UploadCode(c *gin.Context) {
 	// 设置限流键，10秒后自动失效
 	rdb.Set(userRateLimitKey, 1, 10*time.Second)
 
-	// 将文件名改为用户ID_题目ID
+	// 将文件名改为用户ID_题目ID.扩展名
 	newFileName := fmt.Sprintf("%d_%s%s", userInfo.Uid, problem, path.Ext(file.Filename))
-	filepath := filepath.Join(global.CodeDir, newFileName)
 
-	// 保存文件到指定路径
-	if err := c.SaveUploadedFile(file, filepath); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
+	// 保存文件到临时目录
+	tempFilePath := filepath.Join(os.TempDir(), newFileName)
+	if err := c.SaveUploadedFile(file, tempFilePath); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to save file"})
+		return
+	}
+
+	// 转发文件至 JudgeCore
+	if err := ForwardFile(tempFilePath, newFileName); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to forward file"})
 		return
 	}
 
@@ -125,4 +135,56 @@ func UploadCode(c *gin.Context) {
 	}
 	sql.AddSubmitRecord(userInfo.Uid, pidInt, "Running...", language, username)
 	c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
+}
+
+// 转发文件至 JudgeCore
+func ForwardFile(filePath, fileName string) error {
+	// 打开文件
+	file, err := os.Open(filePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	// 创建一个 buffer 来存储 multipart 数据
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+
+	// 创建 form 文件字段
+	part, err := writer.CreateFormFile("code", fileName)
+	if err != nil {
+		return err
+	}
+
+	// 复制文件数据到 part
+	_, err = io.Copy(part, file)
+	if err != nil {
+		return err
+	}
+
+	// 关闭 writer，确保 boundary 信息正确写入
+	writer.Close()
+
+	// 发送 HTTP 请求
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/api/v1/judgecore/judge", global.JudgeCoreAddr), body)
+	if err != nil {
+		return err
+	}
+
+	// 设置 Content-Type
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	// 检查响应状态
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed to forward file, status code: %d", resp.StatusCode)
+	}
+
+	return nil
 }

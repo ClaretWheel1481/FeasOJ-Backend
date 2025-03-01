@@ -1,9 +1,10 @@
 package sql
 
 import (
-	"gorm.io/gorm"
 	"src/internal/global"
 	"src/internal/utils"
+
+	"gorm.io/gorm"
 )
 
 // 获取Problem表中的所有数据
@@ -36,13 +37,6 @@ func SelectProblemInfo(pid string) global.ProblemInfoRequest {
 		Output:      problemall.Output,
 	}
 	return problem
-}
-
-// 获取指定题目的测试样例
-func SelectTestCasesByPid(pid string) []global.TestCaseRequest {
-	var testCases []global.TestCaseRequest
-	utils.ConnectSql().Table("test_cases").Where("pid = ?", pid).Select("input_data,output_data").Find(&testCases)
-	return testCases
 }
 
 // 获取指定题目所有信息

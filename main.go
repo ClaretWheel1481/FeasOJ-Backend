@@ -30,7 +30,6 @@ func main() {
 		"config":      &global.ConfigDir,
 		"certificate": &global.CertDir,
 		"avatars":     &global.AvatarsDir,
-		"codefiles":   &global.CodeDir,
 		"logs":        &global.LogDir,
 		"docs":        &global.DocsDir,
 	}
@@ -87,7 +86,6 @@ func main() {
 	if utils.ImageGuardPing() {
 		log.Println("[FeasOJ] ImageGuard service connection successful")
 	} else {
-		log.Println("[FeasOJ] ImageGuard service connection failed, please check /src/config/global.go")
 		return
 	}
 
@@ -95,17 +93,18 @@ func main() {
 	if utils.ProfanityDetectorPing() {
 		log.Println("[FeasOJ] ProfanityDetector service connection successful")
 	} else {
-		log.Println("[FeasOJ] ProfanityDetector service connection failed, please check /src/config/global.go")
 		return
 	}
 
-	// 构建沙盒镜像
-	if judge.BuildImage() {
-		log.Println("[FeasOJ] SandBox builds successfully")
+	// TODO: 测试JudgeCore连接
+	if judge.JudgeCorePing() {
+		log.Println("[FeasOJ] JudgeCore service connection successful")
 	} else {
-		log.Println("[FeasOJ] SandBox builds fail, please make sure Docker is running and up to date")
 		return
 	}
+
+	// 判题结果消息队列
+	go judge.ConsumeJudgeResults()
 
 	// 启用竞赛状态调度器
 	go scheduler.ScheduleCompetitionStatus()
@@ -120,10 +119,6 @@ func main() {
 
 	// 挂载文档文件夹
 	r.StaticFS("/api/v1/docs", http.Dir(global.DocsDir))
-
-	judge.InitializeContainerPool(config.MaxSandbox)
-
-	go judge.ProcessJudgeTasks()
 
 	startServer := func(protocol, address, certFile, keyFile string) {
 		for {
@@ -152,8 +147,8 @@ func main() {
 	go func() {
 		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
-			if scanner.Text() == "quit" {
-				log.Println("[FeasOJ] The server is being shut down, please be patient to wait for the container to be closed")
+			if scanner.Text() == "exit" || scanner.Text() == "EXIT" {
+				log.Println("[FeasOJ] The server is being shut down")
 				os.Exit(0)
 			}
 		}
@@ -162,11 +157,10 @@ func main() {
 	// 等待中断信号关闭服务器
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	log.Println("[FeasOJ] Input 'quit' or Ctrl+C to stop the server")
+	log.Println("[FeasOJ] Input 'exit' or CTRL+C to stop the server")
 	<-quit
 
 	// 关闭服务器前的清理工作
-	log.Println("[FeasOJ] The server is shutting down, please be patient to wait for the container to be closed")
-	judge.ShutdownContainerPool()
+	log.Println("[FeasOJ] The server is shutting down...")
 	utils.CloseLogger(logFile)
 }

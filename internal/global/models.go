@@ -5,6 +5,13 @@ import (
 	"time"
 )
 
+// 判题结果消息结构体
+type JudgeResultMessage struct {
+	UserID    int    `json:"user_id"`
+	ProblemID int    `json:"problem_id"`
+	Status    string `json:"status"`
+}
+
 // 配置文件结构体
 type Config struct {
 	XMLName     xml.Name    `xml:"config"`

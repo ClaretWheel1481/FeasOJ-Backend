@@ -4,14 +4,18 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"image"
 	"image/png"
 	"io"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"src/internal/config"
+	"src/internal/global"
 
+	"github.com/hashicorp/consul/api"
 	"github.com/nfnt/resize"
 )
 
@@ -46,12 +50,45 @@ func CompressImage(inputPath, outputPath string) error {
 
 // ImageGuardPing 检查服务是否可用
 func ImageGuardPing() bool {
-	resp, err := http.Get(config.ImageGuardAddress)
+	imageGuardPingAddress := GetImageGuardAddress()
+	if imageGuardPingAddress == "" {
+		log.Println("[FeasOJ] Unable to get ImageGuard address from Consul")
+		return false
+	}
+	resp, err := http.Get(imageGuardPingAddress)
 	if err != nil {
+		log.Println("[FeasOJ] Error requesting ImageGuard:", err)
 		return false
 	}
 	defer resp.Body.Close()
+
 	return resp.StatusCode == http.StatusOK
+}
+
+// 获取ImageGuard服务
+func GetImageGuardAddress() string {
+	consulConfig := api.DefaultConfig()
+	consulConfig.Address = config.ConsulAddress
+	consulClient, err := api.NewClient(consulConfig)
+	if err != nil {
+		log.Println("[FeasOJ] Error connecting to Consul:", err)
+		return ""
+	}
+
+	services, _, err := consulClient.Catalog().Service("ImageGuard", "", nil)
+	if err != nil {
+		log.Println("[FeasOJ] Error querying Consul:", err)
+		return ""
+	}
+
+	if len(services) == 0 {
+		log.Println("[FeasOJ] ImageGuard service not found in Consul")
+		return ""
+	}
+
+	service := services[0]
+	global.ImageGuardAddr = "http://" + service.ServiceAddress + ":" + fmt.Sprint(service.ServicePort)
+	return "http://" + service.ServiceAddress + ":" + fmt.Sprint(service.ServicePort) + "/api/v1/image/predict"
 }
 
 // PredictImage 判断图片是否违规
@@ -76,7 +113,7 @@ func PredictImage(imagePath string) bool {
 		return false
 	}
 
-	req, err := http.NewRequest("POST", config.ImageGuardAddress, &buf)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/api/v1/image/predict", global.ImageGuardAddr), &buf)
 	if err != nil {
 		return false
 	}

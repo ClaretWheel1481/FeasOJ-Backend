@@ -10,6 +10,7 @@
 FeasOJ 是一个基于 Vue 和 Golang 的在线编程练习平台，支持多国语言、讨论区、竞赛等功能，旨在为用户提供一个方便、高效的学习和练习环境。
 <br>
 [FeasOJ-Frontend](https://github.com/ClaretWheel1481/FeasOJ)
+[FeasOJ-JudgeCore](https://github.com/ClaretWheel1481/FeasOJ-JudgeCore)
 [ImageGuard](https://github.com/ClaretWheel1481/ImageGuard)
 [Profanity Detector](https://github.com/ClaretWheel1481/ProfanityDetector)
 [API Document(CN)](https://claret-feasoj.apifox.cn)
@@ -37,20 +38,19 @@ FeasOJ-Backend
 │  │    └─sql
 │  ├─go.mod
 │  └─main.go    # 程序主入口
-└─Sandbox   # 当你构建出可执行文件后，请将该文件夹复制到可执行文件同一目录下
 ```
 
 ### 环境
 - Golang 1.24.0
 - Redis
 - MySQL 8.0+
-- Docker
 - RabbitMQ
+- Consul
 
 ### 如何运行
 1. 克隆此库以及[ImageGuard](https://github.com/ClaretWheel1481/ImageGuard)和[Profanity Detector](https://github.com/ClaretWheel1481/ProfanityDetector)
-2. 安装 Docker、MySQL、Redis和RabbitMQ
-3. 运行 `MySQL`、`Redis`、`Docker`、`RabbitMQ`、`ImageGuard` 和 `Profanity Detector`
+2. 安装 Docker、MySQL、Redis、Consul和RabbitMQ
+3. 运行 `MySQL`、`Redis`、`Docker`、`Consul`、`RabbitMQ`、`ImageGuard` 和 `Profanity Detector`
 4. 运行 `cd src` 和 `go mod tidy` 下载依赖
 5. 配置 `src/config/global.go` (打开文件查看以获取详细配置)
 6. 运行 `go run main.go` 启动后端服务器

@@ -10,6 +10,9 @@ const ServerAddress = "127.0.0.1:37881"
 // RabbitMQAddress RabbitMQ地址
 const RabbitMQAddress = "amqp://guest:guest@127.0.0.1:5672/"
 
+// ConsulAddress Consul地址
+const ConsulAddress = "http://127.0.0.1:8500"
+
 // EnableHTTPS 启用https(当该选项启用时，请确保下方证书与私钥路径已经填写，服务器会创建/certificate目录，请将证书与私钥放入其中)
 const EnableHTTPS = false
 
@@ -18,12 +21,6 @@ const ServerCertPath = "./certificate/fullchain.pem"
 
 // ServerKeyPath 服务器私钥路径(./certificate/privkey.key)
 const ServerKeyPath = "./certificate/privkey.key"
-
-// ImageGuardAddress ImageGuard微服务地址
-const ImageGuardAddress = "http://127.0.0.1:37882/api/v1/image/predict"
-
-// ProfanityDetectorAddress ProfanityDetector微服务地址
-const ProfanityDetectorAddress = "http://127.0.0.1:37883/api/v1/text/predict"
 
 /////////////////////////////////////////// MySQL配置 //////////////////////////////////////////////
 

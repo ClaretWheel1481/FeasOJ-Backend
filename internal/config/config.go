@@ -65,12 +65,12 @@ func InputSqlInfo() bool {
 	return true
 }
 
-// 加载Sql配置
+// 加载MySql配置
 func LoadSqlConfig() string {
 	filePath := filepath.Join(global.ConfigDir, "config.xml")
 	config, err := ReadConfigFromFile(filePath)
 	if err != nil {
-		log.Println("[FeasOJ] Error loading SQL config: ", err)
+		log.Println("[FeasOJ] Error loading MySQL config: ", err)
 		return ""
 	}
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Asia%%2FShanghai",
