@@ -106,6 +106,21 @@ func AddComment(c *gin.Context) {
 	did, _ := strconv.Atoi(c.Param("did"))
 	// 获取用户ID
 	userInfo := sql.SelectUserInfo(username)
+
+	rdb := utils.ConnectRedis()
+	defer rdb.Close()
+
+	// 设置频率限制键
+	userRateLimitKey := fmt.Sprintf("commentRateLimit:%d", userInfo.Uid)
+	exists, _ := rdb.Exists(userRateLimitKey).Result()
+	if exists == 1 {
+		c.JSON(http.StatusTooManyRequests, gin.H{"message": GetMessage(c, "rateLimit")})
+		return
+	}
+
+	// 设置限流键
+	rdb.Set(userRateLimitKey, 1, 10*time.Second)
+
 	profanity := false
 	if utils.DetectText(content) {
 		profanity = true

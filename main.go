@@ -96,7 +96,7 @@ func main() {
 		return
 	}
 
-	// TODO: 测试JudgeCore连接
+	// 测试JudgeCore连接
 	if judge.JudgeCorePing() {
 		log.Println("[FeasOJ] JudgeCore service connection successful")
 	} else {
