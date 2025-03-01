@@ -3,7 +3,7 @@ package utils
 import (
 	"fmt"
 	"log"
-	"src/config"
+	"src/internal/config"
 	"src/internal/global"
 	"time"
 

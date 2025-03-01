@@ -1,7 +1,7 @@
-package rabbitmq
+package utils
 
 import (
-	"src/config"
+	"src/internal/config"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )

@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"src/internal/global"
 	"src/internal/utils"
-	"src/internal/utils/rabbitmq"
 	"src/internal/utils/sql"
 	"strconv"
 	"time"
@@ -70,7 +69,7 @@ func UploadCode(c *gin.Context) {
 	userInfo := sql.SelectUserInfo(username)
 
 	// 连接到 RabbitMQ
-	conn, ch, err := rabbitmq.ConnectRabbitMQ()
+	conn, ch, err := utils.ConnectRabbitMQ()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
 		return
@@ -119,7 +118,7 @@ func UploadCode(c *gin.Context) {
 	}
 
 	// 将任务发送到RabbitMQ
-	err = rabbitmq.PublishTask(ch, newFileName)
+	err = utils.PublishTask(ch, newFileName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
 		return

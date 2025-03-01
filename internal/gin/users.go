@@ -7,7 +7,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"src/config"
+	"src/internal/config"
 	"src/internal/global"
 	"src/internal/utils"
 	"src/internal/utils/sql"

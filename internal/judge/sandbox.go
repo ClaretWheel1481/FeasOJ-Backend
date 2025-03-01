@@ -7,7 +7,7 @@ import (
 	"log"
 	"os/exec"
 	"path/filepath"
-	"src/config"
+	"src/internal/config"
 	"src/internal/global"
 	"src/internal/utils/sql"
 	"strings"
@@ -31,13 +31,7 @@ func BuildImage() bool {
 	}
 
 	// 将Dockerfile目录打包成tar格式
-	var dir string
-	if config.DebugMode {
-		dir = global.ParentDir
-	} else {
-		dir = global.CurrentDir
-	}
-	tar, err := archive.TarWithOptions(dir, &archive.TarOptions{})
+	tar, err := archive.TarWithOptions(global.CurrentDir, &archive.TarOptions{})
 	if err != nil {
 		log.Panic(err)
 	}

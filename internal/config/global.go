@@ -4,9 +4,6 @@ import "github.com/docker/docker/api/types/container"
 
 /////////////////////////////////////////// 服务器配置 //////////////////////////////////////////////
 
-// DebugMode 后端模式
-const DebugMode = true
-
 // ServerAddress 服务器Address
 const ServerAddress = "127.0.0.1:37881"
 

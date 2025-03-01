@@ -2,7 +2,7 @@ package utils
 
 import (
 	"encoding/json"
-	"src/config"
+	"src/internal/config"
 	"time"
 
 	"github.com/go-redis/redis"

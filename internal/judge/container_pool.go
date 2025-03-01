@@ -15,7 +15,7 @@ var poolMutex sync.Mutex
 // InitializeContainerPool 预热容器池
 func InitializeContainerPool(n int) {
 	containerPool = make(chan string, n)
-	for i := 0; i < n; i++ {
+	for range n {
 		containerID, err := StartContainer()
 		if err != nil {
 			log.Printf("[FeasOJ] Error starting container during preheat: %v", err)

@@ -7,8 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
-
-	"src/config"
+	"src/internal/config"
 	"src/internal/global"
 	"src/internal/judge"
 	"src/internal/router"
@@ -38,13 +37,7 @@ func main() {
 
 	// 遍历map，设置路径并创建不存在的目录
 	for name, dir := range dirs {
-		var mainDir string
-		if config.DebugMode {
-			mainDir = global.ParentDir
-		} else {
-			mainDir = global.CurrentDir
-		}
-		*dir = filepath.Join(mainDir, name)
+		*dir = filepath.Join(global.CurrentDir, name)
 		if _, err := os.Stat(*dir); os.IsNotExist(err) {
 			os.Mkdir(*dir, os.ModePerm)
 		}
@@ -67,7 +60,7 @@ func main() {
 	utils.InitTable()
 
 	// 初始化管理员账户
-	if sql.SelectAdminUser(1) {
+	if sql.GetAdminUser(1) {
 		log.Println("[FeasOJ] The administrator account already exists and will continue")
 	} else {
 		sql.Register(utils.InitAdminAccount())
@@ -129,10 +122,6 @@ func main() {
 	r.StaticFS("/api/v1/docs", http.Dir(global.DocsDir))
 
 	judge.InitializeContainerPool(config.MaxSandbox)
-
-	// 实时检测Redis JudgeTask中是否有任务
-	// rdb := utils.ConnectRedis()
-	// go judge.ProcessJudgeTasks(rdb)
 
 	go judge.ProcessJudgeTasks()
 

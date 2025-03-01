@@ -102,8 +102,8 @@ func SelectUserInfo(username string) global.UserInfoRequest {
 	return user
 }
 
-// 查询管理员用户
-func SelectAdminUser(role int) bool {
+// 获取是否管理员用户
+func GetAdminUser(role int) bool {
 	// role = 1表示管理员
 	var user global.User
 	err := utils.ConnectSql().Where("role = ?", role).First(&user).Error

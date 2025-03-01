@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"src/config"
+	"src/internal/config"
 )
 
 // PredictionResponse 定义了检测服务返回的 JSON 结构

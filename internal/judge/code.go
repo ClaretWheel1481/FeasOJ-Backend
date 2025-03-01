@@ -3,11 +3,10 @@ package judge
 import (
 	"fmt"
 	"log"
-	"src/config"
+	"src/internal/config"
 	gincontext "src/internal/gin"
 	"src/internal/global"
 	"src/internal/utils"
-	"src/internal/utils/rabbitmq"
 	"src/internal/utils/sql"
 	"strconv"
 	"strings"
@@ -26,7 +25,7 @@ type Task struct {
 // ProcessJudgeTasks 函数用于处理判题任务
 func ProcessJudgeTasks() {
 	// 连接到 RabbitMQ
-	conn, ch, err := rabbitmq.ConnectRabbitMQ()
+	conn, ch, err := utils.ConnectRabbitMQ()
 	if err != nil {
 		log.Println("[FeasOJ] RabbitMQ connect error: ", err)
 		return

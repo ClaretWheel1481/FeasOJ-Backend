@@ -10,7 +10,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
-	"src/config"
+	"src/internal/config"
 
 	"github.com/nfnt/resize"
 )

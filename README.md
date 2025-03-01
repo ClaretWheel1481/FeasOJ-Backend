@@ -15,6 +15,10 @@ FeasOJ is an online programming practice platform based on Vue and Golang, suppo
 [API Document(CN)](https://claret-feasoj.apifox.cn)
 [API Document(EN)](https://claret-feasoj.apifox.cn/en/)
 
+### Notice
+The project is expanding as well as being microserviced, so watch out for the Readme.
+If you find any bugs, please open an issue.
+
 ### Project Structure
 ```
 FeasOJ-Backend
@@ -33,25 +37,24 @@ FeasOJ-Backend
 │  │    └─sql
 │  ├─go.mod
 │  └─main.go    # Main entry file
-└─Sandbox
+└─Sandbox   # After you build the executable file, copy the folder to the same directory as the executable file
 ```
 
 ### Environment
-- Golang 1.23.4
+- Golang 1.24.0
 - Redis
 - MySQL 8.0+
 - Docker
+- RabbitMQ
 
 ### How to run
-1. Clone repository
-2. Install Docker
-3. Run `cd src` and `go mod tidy` Install dependencies
-4. Config `src/config/global.go` (Check it for more details)
-5. Run `go run main.go` to start the back-end server
-
-### Notice
-This is the first time I've written a big project with Vue + Golang, so the code is going to be terrible, but I'll keep going to improve it!
-If you find any bugs, please open an issue.
+1. Clone this repository and [ImageGuard](https://github.com/ClaretWheel1481/ImageGuard), [Profanity Detector](https://github.com/ClaretWheel1481/ProfanityDetector)
+2. Install Docker, RabbitMQ, Redis and MySQL
+3. Start `MySQL`, `Redis`, `Docker`, `RabbitMQ`, `ImageGuard`, `ProfanityDetector` Services
+4. Run `cd src` and `go mod tidy` Install dependencies
+5. Config `src/config/global.go` (Check it for more details)
+6. Run `go run main.go` to start the back-end server
+7. Enter information that system show in the terminal
 
 ### Thanks
 - [Go](https://github.com/golang/go)
@@ -63,3 +66,4 @@ If you find any bugs, please open an issue.
 - [go-redis](https://github.com/redis/go-redis)
 - [go-i18n](https://github.com/nicksnyder/go-i18n)
 - [gocron](https://github.com/go-co-op/gocron)
+- [amqp091-go](https://github.com/rabbitmq/amqp091-go)
