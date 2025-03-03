@@ -15,17 +15,17 @@ type JudgeResultMessage struct {
 // 配置文件结构体
 type Config struct {
 	XMLName     xml.Name    `xml:"config"`
-	SqlConfig   SqlConfig   `xml:"sqlConfig"`
+	SqlConfig   MySqlConfig `xml:"sqlConfig"`
 	RedisConfig RedisConfig `xml:"redisConfig"`
 	MailConfig  MailConfig  `xml:"mailConfig"`
 }
 
 // MySQL数据库连接信息
-type SqlConfig struct {
+type MySqlConfig struct {
+	DbAddress  string `xml:"dbaddress"`
 	DbName     string `xml:"dbname"`
 	DbUser     string `xml:"dbuser"`
 	DbPassword string `xml:"dbpassword"`
-	DbAddress  string `xml:"dbaddress"`
 }
 
 // Redis数据连接信息

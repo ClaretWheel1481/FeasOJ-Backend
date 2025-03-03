@@ -5,10 +5,10 @@ import "github.com/docker/docker/api/types/container"
 /////////////////////////////////////////// 服务器配置 //////////////////////////////////////////////
 
 // ServerAddress 服务器Address
-const ServerAddress = "127.0.0.1:37881"
+const ServerAddress = "127.0.0.1:37882"
 
 // RabbitMQAddress RabbitMQ地址
-const RabbitMQAddress = "amqp://guest:guest@127.0.0.1:5672/"
+const RabbitMQAddress = "amqp://rabbitmq:Sing5200@cloud.claret.space:5672/"
 
 // ConsulAddress Consul地址
 const ConsulAddress = "http://127.0.0.1:8500"

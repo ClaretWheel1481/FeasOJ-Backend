@@ -43,7 +43,7 @@ func InitConfig() {
 
 // 初始化并保存Sql配置
 func InputSqlInfo() bool {
-	var sqlConfig global.SqlConfig
+	var sqlConfig global.MySqlConfig
 	log.Println("[FeasOJ] Please input the MySQL connection configuration：")
 	fmt.Print("[FeasOJ] Database address with port: ")
 	fmt.Scanln(&sqlConfig.DbAddress)

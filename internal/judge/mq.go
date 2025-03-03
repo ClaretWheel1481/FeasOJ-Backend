@@ -17,6 +17,7 @@ func ConsumeJudgeResults() {
 	conn, ch, err := utils.ConnectRabbitMQ()
 	if err != nil {
 		log.Fatal("Failed to connect to RabbitMQ:", err)
+		return
 	}
 	defer conn.Close()
 	defer ch.Close()
@@ -31,7 +32,7 @@ func ConsumeJudgeResults() {
 		nil,            // 参数
 	)
 	if err != nil {
-		log.Fatal("Failed to declare a queue:", err)
+		log.Fatal("[FeasOJ] Failed to declare a message queue:", err)
 	}
 
 	msgs, err := ch.Consume(
@@ -44,7 +45,7 @@ func ConsumeJudgeResults() {
 		nil,
 	)
 	if err != nil {
-		log.Fatal("Failed to register consumer:", err)
+		log.Fatal("[FeasOJ] Failed to register consumer:", err)
 	}
 
 	forever := make(chan bool)
@@ -53,7 +54,7 @@ func ConsumeJudgeResults() {
 		for d := range msgs {
 			var result global.JudgeResultMessage
 			if err := json.Unmarshal(d.Body, &result); err != nil {
-				log.Printf("Error decoding result: %v", err)
+				log.Printf("[FeasOJ] Error decoding result: %v", err)
 				continue
 			}
 			// 发送 SSE 通知
@@ -76,8 +77,6 @@ func ConsumeJudgeResults() {
 				// 将消息发送到客户端的消息通道中
 				client.MessageChan <- message
 			}
-
-			log.Printf("Processed result for user %d", result.UserID)
 		}
 	}()
 
