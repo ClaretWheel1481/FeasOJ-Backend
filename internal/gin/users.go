@@ -26,9 +26,11 @@ func Register(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "userAlreadyinUse")})
 		return
 	}
-	if utils.DetectText(req.Username) {
-		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "profanity")})
-		return
+	if config.ProfanityDetectorEnabled {
+		if utils.DetectText(req.Username) {
+			c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "profanity")})
+			return
+		}
 	}
 	vcodeStatus := utils.CompareVerifyCode(req.Vcode, req.Email)
 	if !vcodeStatus {
@@ -159,9 +161,11 @@ func UpdateSynopsis(c *gin.Context) {
 	encodedUsername := c.GetHeader("Username")
 	username, _ := url.QueryUnescape(encodedUsername)
 	// 更新简介
-	if utils.DetectText(synopsis) {
-		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "profanity")})
-		return
+	if config.ImageGuardEnabled {
+		if utils.DetectText(synopsis) {
+			c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "profanity")})
+			return
+		}
 	}
 	if sql.UpdateSynopsis(username, synopsis) {
 		c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
@@ -197,15 +201,17 @@ func UploadAvatar(c *gin.Context) {
 		return
 	}
 	// 检测图像，若违规则删除
-	if !utils.PredictImage(tempFilePath) {
-		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "illegalImage")})
+	if config.ProfanityDetectorEnabled {
+		if !utils.PredictImage(tempFilePath) {
+			c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "illegalImage")})
 
-		// 删除图像
-		if err := os.Remove(tempFilePath); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
+			// 删除图像
+			if err := os.Remove(tempFilePath); err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
+				return
+			}
 			return
 		}
-		return
 	}
 
 	// 压缩图像

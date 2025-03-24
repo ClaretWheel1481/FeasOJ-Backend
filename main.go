@@ -83,17 +83,21 @@ func main() {
 	}
 
 	// 测试ImageGuard连接
-	if utils.ImageGuardPing() {
-		log.Println("[FeasOJ] ImageGuard service connection successful")
-	} else {
-		return
+	if config.ImageGuardEnabled {
+		if utils.ImageGuardPing() {
+			log.Println("[FeasOJ] ImageGuard service connection successful")
+		} else {
+			return
+		}
 	}
 
 	// 测试ProfanityDetector连接
-	if utils.ProfanityDetectorPing() {
-		log.Println("[FeasOJ] ProfanityDetector service connection successful")
-	} else {
-		return
+	if config.ProfanityDetectorEnabled {
+		if utils.ProfanityDetectorPing() {
+			log.Println("[FeasOJ] ProfanityDetector service connection successful")
+		} else {
+			return
+		}
 	}
 
 	// 测试JudgeCore连接

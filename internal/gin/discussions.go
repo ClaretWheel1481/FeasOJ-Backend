@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"src/internal/config"
 	"src/internal/utils"
 	"src/internal/utils/sql"
 	"strconv"
@@ -39,9 +40,11 @@ func CreateDiscussion(c *gin.Context) {
 	content := c.PostForm("content")
 
 	// 检测文本
-	if utils.DetectText(title) || utils.DetectText(content) {
-		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "profanity")})
-		return
+	if config.ProfanityDetectorEnabled {
+		if utils.DetectText(title) || utils.DetectText(content) {
+			c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "profanity")})
+			return
+		}
 	}
 
 	// 获取用户ID
@@ -122,8 +125,10 @@ func AddComment(c *gin.Context) {
 	rdb.Set(userRateLimitKey, 1, 10*time.Second)
 
 	profanity := false
-	if utils.DetectText(content) {
-		profanity = true
+	if config.ProfanityDetectorEnabled {
+		if utils.DetectText(content) {
+			profanity = true
+		}
 	}
 	if !sql.AddComment(content, did, userInfo.Uid, profanity) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "failed")})

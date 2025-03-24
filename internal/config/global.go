@@ -22,6 +22,12 @@ const ServerCertPath = "./certificate/fullchain.pem"
 // ServerKeyPath 服务器私钥路径(./certificate/privkey.key)
 const ServerKeyPath = "./certificate/privkey.key"
 
+// ImageGuardEnabled ImageGuard是否启用
+const ImageGuardEnabled = false
+
+// ProfanityDetectorEnabled ProfanityDetector是否启用
+const ProfanityDetectorEnabled = false
+
 /////////////////////////////////////////// MySQL配置 //////////////////////////////////////////////
 
 // MaxOpenConns MySQL最大连接数

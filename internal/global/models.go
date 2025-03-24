@@ -211,7 +211,7 @@ type Problem struct {
 	IsVisible   bool   `gorm:"comment:是否可见;not null"`
 }
 
-// 提交记录表: Sid,Pid,Uid,Username,Result,Time,Language
+// 提交记录表: Sid,Pid,Uid,Username,Result,Time,Language,Code
 type SubmitRecord struct {
 	Sid      int       `gorm:"comment:提交ID;primaryKey;autoIncrement"`
 	Pid      int       `gorm:"comment:题目ID"`
@@ -220,6 +220,7 @@ type SubmitRecord struct {
 	Result   string    `gorm:"comment:结果;"`
 	Time     time.Time `gorm:"comment:时间;not null"`
 	Language string    `gorm:"comment:语言;not null"`
+	Code     string    `gorm:"comment:代码;not null"`
 }
 
 // 讨论帖子表: Did,Title,Content,Uid,Create_at
