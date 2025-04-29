@@ -2,6 +2,7 @@ package gincontext
 
 import (
 	"net/http"
+	"net/url"
 	"src/internal/utils/sql"
 
 	"github.com/gin-gonic/gin"
@@ -15,8 +16,19 @@ func GetAllSubmitRecords(c *gin.Context) {
 
 // 获取指定用户提交记录
 func GetSubmitRecordsByUsername(c *gin.Context) {
+	checker := c.GetHeader("Username")
+	encodedUsername, _ := url.QueryUnescape(checker)
 	username := c.Param("username")
-	uid := sql.SelectUserInfo(username).Uid
-	submitrecords := sql.SelectSubmitRecordsByUid(uid)
-	c.JSON(http.StatusOK, gin.H{"submitrecords": submitrecords})
+	if encodedUsername != username {
+		uid := sql.SelectUserInfo(username).Uid
+		submitrecords := sql.SelectSRByUidForChecker(uid)
+		c.JSON(http.StatusOK, gin.H{"submitrecords": submitrecords})
+		return
+	} else {
+		uid := sql.SelectUserInfo(username).Uid
+		submitrecords := sql.SelectSubmitRecordsByUid(uid)
+		c.JSON(http.StatusOK, gin.H{"submitrecords": submitrecords})
+		return
+	}
+
 }

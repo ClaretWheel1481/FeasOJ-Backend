@@ -2,7 +2,6 @@ package sql
 
 import (
 	"src/internal/global"
-	"src/internal/utils"
 	"time"
 
 	"github.com/google/uuid"
@@ -11,13 +10,13 @@ import (
 // 用户注册
 func Register(username, password, email, tokensecret string, role int) bool {
 	time := time.Now()
-	err := utils.ConnectSql().Create(&global.User{Username: username, Password: password, Email: email, CreateAt: time, Role: role, TokenSecret: tokensecret, IsBan: false}).Error
+	err := global.DB.Create(&global.User{Username: username, Password: password, Email: email, CreateAt: time, Role: role, TokenSecret: tokensecret, IsBan: false}).Error
 	return err == nil
 }
 
 // 管理员更新用户信息
 func UpdateUser(Uid int, field string, value interface{}) bool {
-	return utils.ConnectSql().Table("users").Where("uid = ?", Uid).Update(field, value).Error == nil
+	return global.DB.Table("users").Where("uid = ?", Uid).Update(field, value).Error == nil
 }
 
 // 封禁用户
@@ -43,28 +42,28 @@ func DemoteToUser(Uid int) bool {
 // 管理员获取所有用户信息
 func SelectAllUsersInfo() []global.UserInfoRequest {
 	var usersInfo []global.UserInfoRequest
-	utils.ConnectSql().Table("users").Find(&usersInfo)
+	global.DB.Table("users").Find(&usersInfo)
 	return usersInfo
 }
 
 // 更新用户的头像路径
 func UpdateAvatar(username, avatarpath string) bool {
-	err := utils.ConnectSql().Model(&global.User{}).
+	err := global.DB.Model(&global.User{}).
 		Where("username = ?", username).Update("avatar", avatarpath).Error
 	return err == nil
 }
 
 // 更新个人简介
 func UpdateSynopsis(username, synopsis string) bool {
-	err := utils.ConnectSql().Model(&global.User{}).
+	err := global.DB.Model(&global.User{}).
 		Where("username = ?", username).Update("synopsis", synopsis).Error
 	return err == nil
 }
 
 // 根据email与username判断是否该用户已存在
 func IsUserExist(username, email string) bool {
-	if utils.ConnectSql().Where("username = ?", username).
-		First(&global.User{}).Error == nil || utils.ConnectSql().Where("email = ?", email).
+	if global.DB.Where("username = ?", username).
+		First(&global.User{}).Error == nil || global.DB.Where("email = ?", email).
 		First(&global.User{}).Error == nil {
 		return true
 	}
@@ -74,14 +73,14 @@ func IsUserExist(username, email string) bool {
 // 根据邮箱获取用户信息
 func SelectUserByEmail(email string) global.User {
 	var user global.User
-	utils.ConnectSql().Where("email = ?", email).First(&user)
+	global.DB.Where("email = ?", email).First(&user)
 	return user
 }
 
 // 根据email修改密码
 func UpdatePassword(email, newpassword string) bool {
 	tokensecret := uuid.New().String()
-	err := utils.ConnectSql().Model(&global.User{}).
+	err := global.DB.Model(&global.User{}).
 		Where("email = ?", email).Update("password", newpassword).
 		Update("token_secret", tokensecret).Error
 	return err == nil
@@ -90,14 +89,14 @@ func UpdatePassword(email, newpassword string) bool {
 // 根据uid获取用户信息
 func SelectUserByUid(uid int) global.User {
 	var user global.User
-	utils.ConnectSql().Where("uid = ?", uid).First(&user)
+	global.DB.Where("uid = ?", uid).First(&user)
 	return user
 }
 
 // 根据username查询指定用户的除了password和tokensecret之外的所有信息
 func SelectUserInfo(username string) global.UserInfoRequest {
 	var user global.UserInfoRequest
-	utils.ConnectSql().Table("users").Where("username = ?", username).
+	global.DB.Table("users").Where("username = ?", username).
 		First(&user)
 	return user
 }
@@ -106,20 +105,20 @@ func SelectUserInfo(username string) global.UserInfoRequest {
 func GetAdminUser(role int) bool {
 	// role = 1表示管理员
 	var user global.User
-	err := utils.ConnectSql().Where("role = ?", role).First(&user).Error
+	err := global.DB.Where("role = ?", role).First(&user).Error
 	return err == nil
 }
 
 // 获取管理员数量
 func SelectAdminCount() int64 {
 	var count int64
-	utils.ConnectSql().Table("users").Where("role = ?", 1).Count(&count)
+	global.DB.Table("users").Where("role = ?", 1).Count(&count)
 	return count
 }
 
 // 从高到低按照score排序获取前100名用户
 func SelectRank100Users() []global.UserInfoRequest {
 	var usersInfo []global.UserInfoRequest
-	utils.ConnectSql().Table("users").Order("score desc").Limit(100).Find(&usersInfo)
+	global.DB.Table("users").Order("score desc").Limit(100).Find(&usersInfo)
 	return usersInfo
 }

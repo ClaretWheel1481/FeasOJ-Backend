@@ -24,9 +24,6 @@ func LoadRouter(r *gin.Engine) *gin.RouterGroup {
 		// 获取用户信息
 		router1.GET("/users/:username", gincontext.GetUserInfo)
 
-		// 获取指定用户的提交记录
-		router1.GET("/users/:username/submitrecords", gincontext.GetSubmitRecordsByUsername)
-
 		// 密码修改
 		router1.PUT("/users/password", gincontext.UpdatePassword)
 
@@ -39,6 +36,9 @@ func LoadRouter(r *gin.Engine) *gin.RouterGroup {
 	{
 		// 验证用户信息
 		authGroup.GET("/verify", gincontext.VerifyUserInfo)
+
+		// 获取指定用户的提交记录
+		router1.GET("/users/:username/submitrecords", gincontext.GetSubmitRecordsByUsername)
 
 		// 获取指定帖子的评论
 		authGroup.GET("/discussions/comments/:did", gincontext.GetComment)

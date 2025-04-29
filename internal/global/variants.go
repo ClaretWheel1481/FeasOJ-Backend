@@ -1,6 +1,10 @@
 package global
 
-import "sync"
+import (
+	"sync"
+
+	"gorm.io/gorm"
+)
 
 // 全局变量 - 本地配置文件路径
 var ParentDir string
@@ -13,6 +17,9 @@ var DocsDir string
 
 // 全局变量 - 容器ID
 var ContainerIDs sync.Map
+
+// 全局变量 - 数据库连接对象
+var DB *gorm.DB
 
 // 全局变量 - 微服务地址
 var ImageGuardAddr string

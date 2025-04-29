@@ -1,23 +1,21 @@
 package sql
 
 import (
-	"src/internal/global"
-	"src/internal/utils"
-
 	"gorm.io/gorm"
+	"src/internal/global"
 )
 
 // 获取Problem表中的所有数据
 func SelectAllProblems() []global.Problem {
 	var problems []global.Problem
-	utils.ConnectSql().Where("is_visible = ?", true).Find(&problems)
+	global.DB.Where("is_visible = ?", true).Find(&problems)
 	return problems
 }
 
 // 管理员获取Problem表中的所有数据
 func SelectAllProblemsAdmin() []global.Problem {
 	var problems []global.Problem
-	utils.ConnectSql().Find(&problems)
+	global.DB.Find(&problems)
 	return problems
 }
 
@@ -25,7 +23,7 @@ func SelectAllProblemsAdmin() []global.Problem {
 func SelectProblemInfo(pid string) global.ProblemInfoRequest {
 	var problemall global.Problem
 	var problem global.ProblemInfoRequest
-	utils.ConnectSql().Table("problems").Where("pid = ? AND is_visible = ?", pid, true).First(&problemall)
+	global.DB.Table("problems").Where("pid = ? AND is_visible = ?", pid, true).First(&problemall)
 	problem = global.ProblemInfoRequest{
 		Pid:         problemall.Pid,
 		Difficulty:  problemall.Difficulty,
@@ -45,11 +43,11 @@ func SelectProblemTestCases(pid string) global.AdminProblemInfoRequest {
 	var testCases []global.TestCaseRequest
 	var result global.AdminProblemInfoRequest
 
-	if err := utils.ConnectSql().First(&problem, pid).Error; err != nil {
+	if err := global.DB.First(&problem, pid).Error; err != nil {
 		return result
 	}
 
-	if err := utils.ConnectSql().Table("test_cases").Where("pid = ?", pid).Select("input_data,output_data").Find(&testCases).Error; err != nil {
+	if err := global.DB.Table("test_cases").Where("pid = ?", pid).Select("input_data,output_data").Find(&testCases).Error; err != nil {
 		return result
 	}
 
@@ -85,13 +83,13 @@ func UpdateProblem(req global.AdminProblemInfoRequest) error {
 		ContestID:   req.ContestID,
 		IsVisible:   req.IsVisible,
 	}
-	if err := utils.ConnectSql().Save(&problem).Error; err != nil {
+	if err := global.DB.Save(&problem).Error; err != nil {
 		return err
 	}
 
 	// 获取该题目的测试样例
 	var existingTestCases []global.TestCase
-	if err := utils.ConnectSql().Where("pid = ?", req.Pid).Find(&existingTestCases).Error; err != nil {
+	if err := global.DB.Where("pid = ?", req.Pid).Find(&existingTestCases).Error; err != nil {
 		return err
 	}
 
@@ -106,7 +104,7 @@ func UpdateProblem(req global.AdminProblemInfoRequest) error {
 	}
 
 	for _, testCase := range existingTestCaseMap {
-		if err := utils.ConnectSql().Delete(&testCase).Error; err != nil {
+		if err := global.DB.Delete(&testCase).Error; err != nil {
 			return err
 		}
 	}
@@ -114,7 +112,7 @@ func UpdateProblem(req global.AdminProblemInfoRequest) error {
 	// 更新或添加新的测试样例
 	for _, testCase := range req.TestCases {
 		var existingTestCase global.TestCase
-		if err := utils.ConnectSql().Where("pid = ? AND input_data = ?", req.Pid, testCase.InputData).First(&existingTestCase).Error; err != nil {
+		if err := global.DB.Where("pid = ? AND input_data = ?", req.Pid, testCase.InputData).First(&existingTestCase).Error; err != nil {
 			if err == gorm.ErrRecordNotFound {
 				// 如果测试样例不存在，则创建新的样例
 				newTestCase := global.TestCase{
@@ -122,7 +120,7 @@ func UpdateProblem(req global.AdminProblemInfoRequest) error {
 					InputData:  testCase.InputData,
 					OutputData: testCase.OutputData,
 				}
-				if err := utils.ConnectSql().Create(&newTestCase).Error; err != nil {
+				if err := global.DB.Create(&newTestCase).Error; err != nil {
 					return err
 				}
 			} else {
@@ -131,7 +129,7 @@ func UpdateProblem(req global.AdminProblemInfoRequest) error {
 		} else {
 			// 如果测试样例存在，则更新该样例
 			existingTestCase.OutputData = testCase.OutputData
-			if err := utils.ConnectSql().Save(&existingTestCase).Error; err != nil {
+			if err := global.DB.Save(&existingTestCase).Error; err != nil {
 				return err
 			}
 		}
@@ -141,11 +139,11 @@ func UpdateProblem(req global.AdminProblemInfoRequest) error {
 
 // 删除题目及其所有测试样例
 func DeleteProblemAllInfo(pid int) bool {
-	if utils.ConnectSql().Table("problems").Where("pid = ?", pid).Delete(&global.Problem{}).Error != nil {
+	if global.DB.Table("problems").Where("pid = ?", pid).Delete(&global.Problem{}).Error != nil {
 		return false
 	}
 
-	if utils.ConnectSql().Table("test_cases").Where("pid = ?", pid).Delete(&global.TestCase{}).Error != nil {
+	if global.DB.Table("test_cases").Where("pid = ?", pid).Delete(&global.TestCase{}).Error != nil {
 		return false
 	}
 
@@ -155,7 +153,7 @@ func DeleteProblemAllInfo(pid int) bool {
 // 获取指定竞赛ID的所有题目列表
 func SelectProblemsByCompID(competitionID int) []global.ProblemInfoRequest {
 	var problems []global.ProblemInfoRequest
-	if err := utils.ConnectSql().Table("problems").Where("contest_id = ?", competitionID).Find(&problems).Error; err != nil {
+	if err := global.DB.Table("problems").Where("contest_id = ?", competitionID).Find(&problems).Error; err != nil {
 		return nil
 	}
 	return problems
@@ -163,27 +161,27 @@ func SelectProblemsByCompID(competitionID int) []global.ProblemInfoRequest {
 
 // 获取指定题目ID是否可用
 func IsProblemVisible(problemID int) bool {
-	return utils.ConnectSql().Table("problems").Where("pid = ? AND is_visible = ?", problemID, 1).First(&global.Problem{}).Error == nil
+	return global.DB.Table("problems").Where("pid = ? AND is_visible = ?", problemID, 1).First(&global.Problem{}).Error == nil
 }
 
 // 题目状态更新
 func UpdateProblemVisibility() error {
 	// 更新状态为正在进行中的题目：is_visible 为 1
-	if err := utils.ConnectSql().Table("problems").
+	if err := global.DB.Table("problems").
 		Where("contest_id IN (SELECT contest_id FROM competitions WHERE status = ?)", 1).
 		Update("is_visible", 1).Error; err != nil {
 		return err
 	}
 
 	// 更新状态为已结束的题目：is_visible 为 1
-	if err := utils.ConnectSql().Table("problems").
+	if err := global.DB.Table("problems").
 		Where("contest_id IN (SELECT contest_id FROM competitions WHERE status = ?)", 1).
 		Update("is_visible", 1).Error; err != nil {
 		return err
 	}
 
 	// 更新状态为未开始的题目：is_visible 为 0
-	if err := utils.ConnectSql().Table("problems").
+	if err := global.DB.Table("problems").
 		Where("contest_id IN (SELECT contest_id FROM competitions WHERE status = ?)", 0).
 		Update("is_visible", 0).Error; err != nil {
 		return err

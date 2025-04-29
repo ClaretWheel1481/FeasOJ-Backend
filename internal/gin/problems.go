@@ -113,6 +113,16 @@ func UploadCode(c *gin.Context) {
 		return
 	}
 
+	// 读取文件内容
+	code, err := os.ReadFile(tempFilePath)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to read file"})
+		return
+	}
+
+	// 移除临时文件
+	os.Remove(tempFilePath)
+
 	var language string
 	switch path.Ext(file.Filename) {
 	case ".cpp":
@@ -133,7 +143,7 @@ func UploadCode(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
 		return
 	}
-	sql.AddSubmitRecord(userInfo.Uid, pidInt, "Running...", language, username)
+	sql.AddSubmitRecord(userInfo.Uid, pidInt, "Running...", language, username, string(code))
 	c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 }
 

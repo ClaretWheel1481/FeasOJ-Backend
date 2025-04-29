@@ -53,9 +53,7 @@ func main() {
 	config.InitConfig()
 
 	// 初始化数据库
-	if utils.ConnectSql() == nil {
-		return
-	}
+	global.DB = utils.ConnectSql()
 	utils.InitTable()
 
 	// 初始化管理员账户

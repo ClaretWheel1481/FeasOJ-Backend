@@ -30,7 +30,7 @@ func InitAdminAccount() (string, string, string, string, int) {
 
 // 创建表
 func InitTable() bool {
-	ConnectSql().AutoMigrate(
+	global.DB.AutoMigrate(
 		&global.User{},
 		&global.Problem{},
 		&global.SubmitRecord{},
