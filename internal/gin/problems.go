@@ -133,6 +133,8 @@ func UploadCode(c *gin.Context) {
 		language = "Python"
 	case ".go":
 		language = "Go"
+	case ".rs":
+		language = "Rust"
 	default:
 		language = "Unknown"
 	}
