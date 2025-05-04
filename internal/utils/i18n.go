@@ -24,6 +24,8 @@ func InitI18n() *i18n.Bundle {
 	bundle.LoadMessageFileFS(LocaleFS, "locales/es.json")
 	bundle.LoadMessageFileFS(LocaleFS, "locales/fr.json")
 	bundle.LoadMessageFileFS(LocaleFS, "locales/it.json")
+	bundle.LoadMessageFileFS(LocaleFS, "locales/ar.json")
+	bundle.LoadMessageFileFS(LocaleFS, "locales/pt.json")
 
 	return bundle
 }

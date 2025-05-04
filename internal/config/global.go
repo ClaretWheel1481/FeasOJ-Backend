@@ -23,10 +23,10 @@ const ServerCertPath = "./certificate/fullchain.pem"
 const ServerKeyPath = "./certificate/privkey.key"
 
 // ImageGuardEnabled ImageGuard是否启用
-const ImageGuardEnabled = false
+const ImageGuardEnabled = true
 
 // ProfanityDetectorEnabled ProfanityDetector是否启用
-const ProfanityDetectorEnabled = false
+const ProfanityDetectorEnabled = true
 
 /////////////////////////////////////////// MySQL配置 //////////////////////////////////////////////
 
