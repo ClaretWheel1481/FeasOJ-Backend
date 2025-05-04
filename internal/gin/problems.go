@@ -135,6 +135,10 @@ func UploadCode(c *gin.Context) {
 		language = "Go"
 	case ".rs":
 		language = "Rust"
+	case ".php":
+		language = "PHP"
+	case ".pas":
+		language = "Pascal"
 	default:
 		language = "Unknown"
 	}
