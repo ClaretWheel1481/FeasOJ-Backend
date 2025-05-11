@@ -3,7 +3,6 @@ package gincontext
 import (
 	"net/http"
 	"src/internal/global"
-	"src/internal/utils"
 	"src/internal/utils/sql"
 	"strconv"
 
@@ -143,7 +142,7 @@ func UpdateCompetitionInfo(c *gin.Context) {
 		return
 	}
 
-	// 更新题目信息
+	// 更新竞赛信息
 	if err := sql.UpdateCompetition(req); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
 		return
@@ -158,7 +157,7 @@ func CalculateScore(c *gin.Context) {
 
 	// 查询竞赛信息
 	var competition global.Competition
-	utils.ConnectSql().First(&competition, competitionId)
+	global.DB.First(&competition, competitionId)
 	if competition.Scored {
 		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "competition_scored")})
 		return
@@ -174,7 +173,7 @@ func CalculateScore(c *gin.Context) {
 	// 遍历所有参与竞赛的用户
 	for _, user := range users {
 		var submissions []global.SubmitRecord
-		utils.ConnectSql().
+		global.DB.
 			Where("uid = ? AND result = ? AND time BETWEEN ? AND ?",
 				user.Uid,
 				"Success",
@@ -186,7 +185,7 @@ func CalculateScore(c *gin.Context) {
 		score := 0
 		for _, submission := range submissions {
 			var difficulty string
-			err := utils.ConnectSql().
+			err := global.DB.
 				Table("problems").
 				Select("difficulty").
 				Where("contest_id = ? AND pid = ?", competitionId, submission.Pid).
@@ -208,13 +207,13 @@ func CalculateScore(c *gin.Context) {
 
 		// 更新用户分数
 		if score > 0 {
-			utils.ConnectSql().Model(&global.User{}).Where("uid = ?", user.Uid).Update("score", gorm.Expr("score + ?", score))
+			global.DB.Model(&global.User{}).Where("uid = ?", user.Uid).Update("score", gorm.Expr("score + ?", score))
 		}
 
-		utils.ConnectSql().Model(&global.UserCompetitions{}).Where("uid = ?", user.Uid).Update("score", score)
+		global.DB.Model(&global.UserCompetitions{}).Where("uid = ?", user.Uid).Update("score", score)
 	}
 
-	utils.ConnectSql().Model(&global.Competition{}).Where("contest_id = ?", competitionId).Update("scored", true)
+	global.DB.Model(&global.Competition{}).Where("contest_id = ?", competitionId).Update("scored", true)
 
 	c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 }

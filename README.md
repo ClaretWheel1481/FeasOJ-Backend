@@ -24,24 +24,23 @@ If you find any bugs, please open an issue.
 ```
 FeasOJ-Backend
 │ 
-├─src
-│  ├─config
-│  ├─internal
-│  │  ├─gin
-│  │  ├─global
-│  │  ├─judge
-│  │  ├─middlewares
-│  │  ├─router
-│  │  └─utils
-│  │    ├─locales   # i18n files
-│  │    ├─scheduler
-│  │    └─sql
-│  ├─go.mod
-│  └─main.go    # Main entry file
+├─config
+├─internal
+│  ├─gin
+│  ├─global
+│  ├─judge
+│  ├─middlewares
+│  ├─router
+│  └─utils
+│      ├─locales   # i18n files
+│      ├─scheduler
+│      └─sql
+├─go.mod
+└─main.go    # Main entry file
 ```
 
 ### Environment
-- Golang 1.24.0
+- Golang 1.24.2
 - Redis
 - MySQL 8.0+
 - RabbitMQ

@@ -30,7 +30,7 @@ func InitAdminAccount() (string, string, string, string, int) {
 
 // 创建表
 func InitTable() bool {
-	global.DB.AutoMigrate(
+	err := global.DB.AutoMigrate(
 		&global.User{},
 		&global.Problem{},
 		&global.SubmitRecord{},
@@ -40,6 +40,9 @@ func InitTable() bool {
 		&global.Competition{},
 		&global.UserCompetitions{},
 	)
+	if err != nil {
+		return false
+	}
 	return true
 }
 
@@ -66,6 +69,6 @@ func ConnectSql() *gorm.DB {
 // 根据用户名获取用户信息
 func SelectUser(username string) global.User {
 	var user global.User
-	ConnectSql().Where("username = ?", username).First(&user)
+	global.DB.Where("username = ?", username).First(&user)
 	return user
 }

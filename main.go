@@ -23,7 +23,6 @@ import (
 func main() {
 	log.Println("[FeasOJ] The server is starting...")
 	global.CurrentDir, _ = os.Getwd()
-	global.ParentDir = filepath.Dir(global.CurrentDir)
 
 	// 定义目录映射
 	dirs := map[string]*string{
@@ -54,7 +53,12 @@ func main() {
 
 	// 初始化数据库
 	global.DB = utils.ConnectSql()
-	utils.InitTable()
+	if utils.InitTable() {
+		log.Println("[FeasOJ] Database initialization complete")
+	} else {
+		log.Println("[FeasOJ] Database initialization failed")
+		return
+	}
 
 	// 初始化管理员账户
 	if sql.GetAdminUser(1) {
@@ -62,14 +66,13 @@ func main() {
 	} else {
 		sql.Register(utils.InitAdminAccount())
 	}
-	log.Println("[FeasOJ] MySQL initialization complete")
 
 	// 测试邮箱模块是否正常
-	if !utils.TestSend(config.InitEmailConfig()) {
+	if utils.TestSend(config.InitEmailConfig()) {
+		log.Println("[FeasOJ] Email service initialization complete")
+	} else {
 		log.Println("[FeasOJ] Email service startup failed, please check the configuration")
 		return
-	} else {
-		log.Println("[FeasOJ] Email service initialization complete")
 	}
 
 	// 测试Redis连接
@@ -85,6 +88,7 @@ func main() {
 		if utils.ImageGuardPing() {
 			log.Println("[FeasOJ] ImageGuard service connection successful")
 		} else {
+			log.Panicln("[FeasOJ] ImageGuard service connection failed")
 			return
 		}
 	}
@@ -94,6 +98,7 @@ func main() {
 		if utils.ProfanityDetectorPing() {
 			log.Println("[FeasOJ] ProfanityDetector service connection successful")
 		} else {
+			log.Panicln("[FeasOJ] ProfanityDetector service connection failed")
 			return
 		}
 	}
@@ -102,6 +107,7 @@ func main() {
 	if judge.JudgeCorePing() {
 		log.Println("[FeasOJ] JudgeCore service connection successful")
 	} else {
+		log.Panicln("[FeasOJ] JudgeCore service connection failed")
 		return
 	}
 

@@ -24,24 +24,23 @@ FeasOJ 是一个基于 Vue 和 Golang 的在线编程练习平台，支持多国
 ```
 FeasOJ-Backend
 │ 
-├─src
-│  ├─config
-│  ├─internal
-│  │  ├─gin
-│  │  ├─global
-│  │  ├─judge
-│  │  ├─middlewares
-│  │  ├─router
-│  │  └─utils
-│  │    ├─locales   # i18n 翻译文件
-│  │    ├─scheduler
-│  │    └─sql
-│  ├─go.mod
-│  └─main.go    # 程序主入口
+├─config
+├─internal
+│  ├─gin
+│  ├─global
+│  ├─judge
+│  ├─middlewares
+│  ├─router
+│  └─utils
+│      ├─locales
+│      ├─scheduler
+│      └─sql
+├─go.mod
+└─main.go
 ```
 
 ### 环境
-- Golang 1.24.0
+- Golang 1.24.2
 - Redis
 - MySQL 8.0+
 - RabbitMQ

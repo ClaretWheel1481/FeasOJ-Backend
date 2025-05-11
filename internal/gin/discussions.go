@@ -65,9 +65,7 @@ func CreateDiscussion(c *gin.Context) {
 	rdb.Set(userRateLimitKey, 1, 15*time.Second)
 
 	// 创建讨论
-	uid := userInfo.Uid
-
-	if !sql.AddDiscussion(title, content, uid) {
+	if !sql.AddDiscussion(title, content, userInfo.Uid) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
 		return
 	}
@@ -97,6 +95,7 @@ func DelComment(c *gin.Context) {
 	cid, _ := strconv.Atoi(c.Param("cid"))
 	if !sql.DeleteCommentByCid(cid) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "failed")})
+		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 }

@@ -45,7 +45,6 @@ func JoinCompetitionWithPassword(c *gin.Context) {
 			return
 		}
 	}
-
 	c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "failed")})
 }
 
@@ -63,7 +62,6 @@ func JoinCompetition(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 		return
 	}
-
 	c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "failed")})
 }
 
@@ -73,11 +71,9 @@ func IsInCompetition(c *gin.Context) {
 	username, _ := url.QueryUnescape(encodedUsername)
 	competitionId, _ := strconv.Atoi(c.Param("cid"))
 	uid := sql.SelectUserInfo(username).Uid
-	if sql.SelectUserCompetition(uid, competitionId) {
-		c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success"), "isIn": true})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success"), "isIn": false})
+
+	in := sql.SelectUserCompetition(uid, competitionId)
+	c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success"), "isIn": in})
 }
 
 // 查询指定竞赛中的所有参与用户
