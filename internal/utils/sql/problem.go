@@ -1,6 +1,7 @@
 package sql
 
 import (
+	"errors"
 	"gorm.io/gorm"
 	"src/internal/global"
 )
@@ -113,7 +114,7 @@ func UpdateProblem(req global.AdminProblemInfoRequest) error {
 	for _, testCase := range req.TestCases {
 		var existingTestCase global.TestCase
 		if err := global.DB.Where("pid = ? AND input_data = ?", req.Pid, testCase.InputData).First(&existingTestCase).Error; err != nil {
-			if err == gorm.ErrRecordNotFound {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
 				// 如果测试样例不存在，则创建新的样例
 				newTestCase := global.TestCase{
 					Pid:        req.Pid,

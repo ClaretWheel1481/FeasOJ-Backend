@@ -3,11 +3,14 @@ package utils
 import (
 	"fmt"
 	"regexp"
+	"src/internal/config"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
+
+var emailRegex = regexp.MustCompile(`^\w+([-+.]?\w+)*@\w+([-.]?\w+)*\.\w+([-.]?\w+)*$`)
 
 // 用户密码加密
 func EncryptPassword(password string) string {
@@ -26,18 +29,15 @@ func VerifyPassword(password, hash string) bool {
 
 // 判断是否邮箱登录
 func IsEmail(email string) bool {
-	pattern := `^\w+([-+.]?\w+)*@\w+([-.]?\w+)*\.\w+([-.]?\w+)*$`
-	reg := regexp.MustCompile(pattern)
-	return reg.MatchString(email)
+	return emailRegex.MatchString(email)
 }
 
 // 用户Token生成后返回给前端
 func GenerateToken(username string) (string, error) {
-	token := jwt.New(jwt.SigningMethodHS256)
-	// 设置Token的Claims
+	token := jwt.New(config.SigningMethod)
 	claims := token.Claims.(jwt.MapClaims)
 	claims["username"] = username
-	claims["exp"] = time.Now().Add(30 * 24 * time.Hour).Unix() // 设置30天过期时间
+	claims["exp"] = time.Now().Add(config.TokenExpirePeriod).Unix()
 	// 生成Token
 	tokenString, err := token.SignedString([]byte(SelectUser(username).TokenSecret))
 	if err != nil {

@@ -9,8 +9,8 @@ import (
 
 // 用户注册
 func Register(username, password, email, tokensecret string, role int) bool {
-	time := time.Now()
-	err := global.DB.Create(&global.User{Username: username, Password: password, Email: email, CreateAt: time, Role: role, TokenSecret: tokensecret, IsBan: false}).Error
+	now := time.Now()
+	err := global.DB.Create(&global.User{Username: username, Password: password, Email: email, CreateAt: now, Role: role, TokenSecret: tokensecret, IsBan: false}).Error
 	return err == nil
 }
 
@@ -84,13 +84,6 @@ func UpdatePassword(email, newpassword string) bool {
 		Where("email = ?", email).Update("password", newpassword).
 		Update("token_secret", tokensecret).Error
 	return err == nil
-}
-
-// 根据uid获取用户信息
-func SelectUserByUid(uid int) global.User {
-	var user global.User
-	global.DB.Where("uid = ?", uid).First(&user)
-	return user
 }
 
 // 根据username查询指定用户的除了password和tokensecret之外的所有信息

@@ -1,8 +1,6 @@
 package global
 
 import (
-	"sync"
-
 	"gorm.io/gorm"
 )
 
@@ -13,9 +11,6 @@ var AvatarsDir string
 var CurrentDir string
 var CertDir string
 var DocsDir string
-
-// 全局变量 - 容器ID
-var ContainerIDs sync.Map
 
 // 全局变量 - 数据库连接对象
 var DB *gorm.DB

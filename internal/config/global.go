@@ -1,5 +1,10 @@
 package config
 
+import (
+	"github.com/golang-jwt/jwt/v5"
+	"time"
+)
+
 /////////////////////////////////////////// 服务器配置 //////////////////////////////////////////////
 
 // ServerAddress 服务器Address
@@ -36,3 +41,9 @@ const MaxIdleConns = 100
 
 // MaxLifeTime MySQL连接最大生命周期（单位：秒）
 const MaxLifeTime = 32
+
+// ////////////////////////////////////////// JWT配置 ///////////////////////////////////////////////
+var (
+	SigningMethod     = jwt.SigningMethodHS256 // 签名方法
+	TokenExpirePeriod = 30 * 24 * time.Hour    // Token 过期时间
+)
