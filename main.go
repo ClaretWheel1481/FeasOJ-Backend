@@ -37,7 +37,11 @@ func main() {
 	for name, dir := range dirs {
 		*dir = filepath.Join(global.CurrentDir, name)
 		if _, err := os.Stat(*dir); os.IsNotExist(err) {
-			os.Mkdir(*dir, os.ModePerm)
+			err := os.Mkdir(*dir, os.ModePerm)
+			if err != nil {
+				log.Panicf("[FeasOJ] Failed to create directory: %v", err)
+				return
+			}
 		}
 	}
 

@@ -2,6 +2,7 @@ package gincontext
 
 import (
 	"fmt"
+	"github.com/go-redis/redis"
 	"net/http"
 	"net/url"
 	"os"
@@ -17,10 +18,44 @@ import (
 	"github.com/google/uuid"
 )
 
+// 自增登录计数器
+func incrLoginCounter(rdb *redis.Client, ip string, success bool) {
+	var counterKey, blockKey string
+	if success {
+		counterKey = fmt.Sprintf("loginSuccCount:%s", ip)
+		blockKey = fmt.Sprintf("loginBlock:%s", ip)
+	} else {
+		counterKey = fmt.Sprintf("loginFailCount:%s", ip)
+		blockKey = fmt.Sprintf("loginBlock:%s", ip)
+	}
+	cnt, _ := rdb.Incr(counterKey).Result()
+	if cnt == 1 {
+		rdb.Expire(counterKey, 30*time.Minute)
+	}
+	if cnt >= 5 {
+		rdb.Set(blockKey, 1, 30*time.Minute)
+	}
+}
+
 // 注册
 func Register(c *gin.Context) {
+	clientIP := c.ClientIP()
+	rdb := utils.ConnectRedis()
+	defer rdb.Close()
+
+	// 封禁键
+	blockKey := fmt.Sprintf("regBlock:%s", clientIP)
+	if ok, _ := rdb.Exists(blockKey).Result(); ok == 1 {
+		c.JSON(http.StatusTooManyRequests, gin.H{"message": GetMessage(c, "rateLimit")})
+		return
+	}
+
 	var req global.RegisterRequest
-	c.ShouldBind(&req)
+	if err := c.ShouldBind(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "invalidRequest")})
+		return
+	}
+
 	// 判断用户或邮箱是否存在
 	if sql.IsUserExist(req.Username, req.Email) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "userAlreadyinUse")})
@@ -37,8 +72,28 @@ func Register(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "captchaError")})
 		return
 	}
-	regstatus := sql.Register(req.Username, utils.EncryptPassword(req.Password), req.Email, uuid.New().String(), 0)
-	if regstatus {
+	success := sql.Register(req.Username, utils.EncryptPassword(req.Password), req.Email, uuid.New().String(), 0)
+
+	// 计数键
+	var counterKey string
+	if success {
+		counterKey = fmt.Sprintf("regSuccCount:%s", clientIP)
+	} else {
+		counterKey = fmt.Sprintf("regFailCount:%s", clientIP)
+	}
+	// 自增计数
+	cnt, _ := rdb.Incr(counterKey).Result()
+	// 首次自增时，设置 30 分钟过期
+	if cnt == 1 {
+		rdb.Expire(counterKey, 30*time.Minute)
+	}
+	// 达到 5 次阈值，开启 30 分钟封禁
+	if cnt >= 5 {
+		rdb.Set(blockKey, 1, 30*time.Minute)
+	}
+
+	// 返回结果
+	if success {
 		c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "failed")})
@@ -47,55 +102,97 @@ func Register(c *gin.Context) {
 
 // 登录
 func Login(c *gin.Context) {
-	var Username string
-	user := c.Query("username")
-	Password := c.Query("password")
-	// 判断用户输入是否为邮箱
-	if utils.IsEmail(user) {
-		Username = sql.SelectUserByEmail(user).Username
-	} else {
-		Username = user
+	clientIP := c.ClientIP()
+	rdb := utils.ConnectRedis()
+	defer rdb.Close()
+
+	// 封禁键
+	blockKey := fmt.Sprintf("loginBlock:%s", clientIP)
+	if ok, _ := rdb.Exists(blockKey).Result(); ok == 1 {
+		c.JSON(http.StatusTooManyRequests, gin.H{"message": GetMessage(c, "rateLimit")})
+		return
 	}
-	userPassword := utils.SelectUser(Username).Password
-	if userPassword == "" {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
+
+	// 取参
+	userParam := c.Query("username")
+	password := c.Query("password")
+
+	// 查用户名
+	var username string
+	if utils.IsEmail(userParam) {
+		username = sql.SelectUserByEmail(userParam).Username
 	} else {
-		// 用户是否被封禁
-		if sql.SelectUserInfo(Username).IsBan {
-			c.JSON(http.StatusForbidden, gin.H{"message": GetMessage(c, "userIsBanned")})
+		username = userParam
+	}
+
+	// 验证用户存在
+	storedPwd := utils.SelectUser(username).Password
+	if storedPwd == "" {
+		// 统计失败
+		incrLoginCounter(rdb, clientIP, false)
+		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
+		return
+	}
+
+	// 是否封号
+	if sql.SelectUserInfo(username).IsBan {
+		c.JSON(http.StatusForbidden, gin.H{"message": GetMessage(c, "userIsBanned")})
+		return
+	}
+
+	// 验证密码
+	ok := utils.VerifyPassword(password, storedPwd)
+	// 统计 成功/失败
+	incrLoginCounter(rdb, clientIP, ok)
+
+	if ok {
+		token, err := utils.GenerateToken(username)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
 			return
 		}
-		// 校验密码是否正确
-		if utils.VerifyPassword(Password, userPassword) {
-			// 生成Token并返回至前端
-			token, err := utils.GenerateToken(Username)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
-			}
-			c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "loginSuccess"), "token": token})
-		} else {
-			c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "wrongPassword")})
-		}
+		c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "loginSuccess"), "token": token})
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "wrongPassword")})
 	}
 }
 
 // 获取验证码
+// 获取验证码（IP + 邮箱 1 分钟限流）
 func GetCaptcha(c *gin.Context) {
-	// 获取邮箱地址
-	emails := c.Query("email")
+	clientIP := c.ClientIP()
+	email := c.Query("email")
 	isCreate := c.GetHeader("iscreate")
+
+	rdb := utils.ConnectRedis()
+	defer rdb.Close()
+
+	// 限流键
+	rateKey := fmt.Sprintf("captchaRateLimit:%s:%s", clientIP, email)
+	if exists, _ := rdb.Exists(rateKey).Result(); exists == 1 {
+		c.JSON(http.StatusTooManyRequests, gin.H{"message": GetMessage(c, "rateLimit")})
+		return
+	}
+
+	// 原有校验逻辑：注册/重置场景区分
 	if isCreate == "false" {
-		if sql.SelectUserByEmail(emails).Username == "" {
+		if sql.SelectUserByEmail(email).Username == "" {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
 			return
 		}
 	} else {
-		if sql.SelectUserByEmail(emails).Username != "" {
+		if sql.SelectUserByEmail(email).Username != "" {
 			c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "userAlreadyinUse")})
 			return
 		}
 	}
-	if utils.SendVerifycode(config.InitEmailConfig(), emails, utils.GenerateVerifycode()) {
+
+	// 发送验证码
+	code := utils.GenerateVerifycode()
+	sent := utils.SendVerifycode(config.InitEmailConfig(), email, code)
+	if sent {
+		// 限流键写入，1分钟过期
+		rdb.Set(rateKey, 1, time.Minute)
 		c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 	} else {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})

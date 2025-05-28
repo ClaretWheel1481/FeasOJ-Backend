@@ -8,7 +8,7 @@ import (
 )
 
 func LoadRouter(r *gin.Engine) *gin.RouterGroup {
-	r.Use(middlewares.Logger())
+	r.Use(middlewares.Logger(), middlewares.IPStatistic())
 	// 设置路由组
 	router1 := r.Group("/api/v1")
 	{

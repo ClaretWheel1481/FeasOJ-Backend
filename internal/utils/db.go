@@ -39,6 +39,7 @@ func InitTable() bool {
 		&global.TestCase{},
 		&global.Competition{},
 		&global.UserCompetitions{},
+		&global.IPVisit{},
 	)
 	if err != nil {
 		return false

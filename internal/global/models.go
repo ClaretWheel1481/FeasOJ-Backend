@@ -5,6 +5,13 @@ import (
 	"time"
 )
 
+// IP访问记录
+type IPVisit struct {
+	IP         string    `gorm:"comment:IP;primaryKey;type:varchar(45)"`
+	VisitCount int64     `gorm:"comment:调用次数;not null;default:0"`
+	LastVisit  time.Time `gorm:"comment:最后调用;autoUpdateTime"`
+}
+
 // 判题结果消息结构体
 type JudgeResultMessage struct {
 	UserID    int    `json:"user_id"`
