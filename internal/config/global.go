@@ -17,7 +17,7 @@ const RabbitMQAddress = "amqp://rabbitmq:Sing5200@cloud.claret.space:5672/"
 const ConsulAddress = "http://localhost:8500"
 
 // EnableHTTPS 启用https(当该选项启用时，请确保下方证书与私钥路径已经填写，服务器会创建/certificate目录，请将证书与私钥放入其中)
-const EnableHTTPS = false
+const EnableHTTPS = true
 
 // ServerCertPath 服务器证书路径(./certificate/fullchain.pem)
 const ServerCertPath = "./certificate/fullchain.pem"

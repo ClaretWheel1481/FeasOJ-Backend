@@ -12,9 +12,11 @@ func GetLangFromHeader(c *gin.Context) language.Tag {
 	if acceptLanguage == "" {
 		return language.English
 	}
-
-	tag, _, _ := language.ParseAcceptLanguage(acceptLanguage)
-	return tag[0]
+	tags, _, _ := language.ParseAcceptLanguage(acceptLanguage)
+	if len(tags) == 0 {
+		return language.English
+	}
+	return tags[0]
 }
 
 // 获取国际化消息
