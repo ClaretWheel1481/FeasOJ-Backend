@@ -24,7 +24,7 @@ FeasOJ 是一个基于 Vue 和 Golang 的在线编程练习平台，支持多国
 ```
 FeasOJ-Backend
 │ 
-├─config
+├─config.json          # 配置文件
 ├─internal
 │  ├─gin
 │  ├─global
@@ -40,20 +40,31 @@ FeasOJ-Backend
 ```
 
 ### 环境
-- Golang 1.24.2
+- Golang 1.24.4
 - Redis
 - MySQL 8.0+
 - RabbitMQ
 - Consul
 
 ### 如何运行
-1. 克隆此库以及[ImageGuard](https://github.com/ClaretWheel1481/ImageGuard)和[Profanity Detector](https://github.com/ClaretWheel1481/ProfanityDetector)以及[FeasOJ-JudgeCore](https://github.com/ClaretWheel1481/FeasOJ-JudgeCore)
+1. 克隆此库以及[ImageGuard](https://github.com/ClaretWheel1481/ImageGuard)(可选)和[Profanity Detector](https://github.com/ClaretWheel1481/ProfanityDetector)(可选)以及[FeasOJ-JudgeCore](https://github.com/ClaretWheel1481/FeasOJ-JudgeCore)(必须)
 2. 安装 Docker、MySQL、Redis、Consul和RabbitMQ
-3. 运行 `MySQL`、`Redis`、`Docker`、`Consul`、`RabbitMQ`、`ImageGuard` 和 `Profanity Detector`
+3. 运行 `MySQL`、`Redis`、`Docker`、`Consul`、`RabbitMQ`、`ImageGuard`(可选) 和 `Profanity Detector`(可选)
 4. 运行 `cd src` 和 `go mod tidy` 下载依赖
-5. 配置 `src/config/global.go` (打开文件查看以获取详细配置)
+5. 首次运行程序会自动创建 `config.json` 配置文件，请编辑该文件配置数据库、Redis、邮件等信息
 6. 运行 `go run main.go` 启动后端服务器
-7. 输入控制台提示的连接信息即可
+
+### 配置说明
+程序使用 JSON 配置文件管理所有配置项。首次运行时会自动创建 `config.json` 文件，包含以下配置：
+
+- **服务器配置**: 监听地址、HTTPS设置、证书路径
+- **数据库配置**: MySQL连接信息、连接池设置
+- **Redis配置**: Redis连接地址和密码
+- **邮件配置**: SMTP服务器信息
+- **微服务配置**: RabbitMQ、Consul地址
+- **功能开关**: [ImageGuard](https://github.com/ClaretWheel1481/ImageGuard)、[Profanity Detector](https://github.com/ClaretWheel1481/ProfanityDetector)检测等
+
+详细配置说明请参考 [CONFIG_README.md](CONFIG_README.md)
 
 ### 致谢
 - [Go](https://github.com/golang/go)

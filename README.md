@@ -24,7 +24,7 @@ If you find any bugs, please open an issue.
 ```
 FeasOJ-Backend
 │ 
-├─config
+├─config.json          # Configuration file
 ├─internal
 │  ├─gin
 │  ├─global
@@ -40,22 +40,33 @@ FeasOJ-Backend
 ```
 
 ### Environment
-- Golang 1.24.2
+- Golang 1.24.4
 - Redis
 - MySQL 8.0+
 - RabbitMQ
 - Consul
 
 ### How to run
-1. Clone this repository and [ImageGuard](https://github.com/ClaretWheel1481/ImageGuard), [Profanity Detector](https://github.com/ClaretWheel1481/ProfanityDetector), and [FeasOJ-JudgeCore](https://github.com/ClaretWheel1481/FeasOJ-JudgeCore)
+1. Clone this repository and [ImageGuard](https://github.com/ClaretWheel1481/ImageGuard)(Optional), [Profanity Detector](https://github.com/ClaretWheel1481/ProfanityDetector)(Optional), and [FeasOJ-JudgeCore](https://github.com/ClaretWheel1481/FeasOJ-JudgeCore)
 2. Install Docker, RabbitMQ, Consul, Redis and MySQL
-3. Start `MySQL`, `Redis`, `Docker`, `Consul`, `RabbitMQ`, `ImageGuard`, `ProfanityDetector` Services
+3. Start `MySQL`, `Redis`, `Docker`, `Consul`, `RabbitMQ`, `ImageGuard`(Optional), `ProfanityDetector`(Optional) Services
 4. Run `cd src` and `go mod tidy` Install dependencies
-5. Config `src/config/global.go` (Check it for more details)
-6. Run `go run main.go` to start the back-end server
-7. Enter information that system show in the terminal
+5. On first run, the program will automatically create a `config.json` configuration file. Please edit this file to configure database, Redis, email and other information
+6. Run `go run main.go` to start the backend server
 
-### Thanks
+### Configuration
+The program uses JSON configuration files to manage all configuration items. On first run, it will automatically create a `config.json` file containing:
+
+- **Server Configuration**: Listen address, HTTPS settings, certificate paths
+- **Database Configuration**: MySQL connection information, connection pool settings
+- **Redis Configuration**: Redis connection address and password
+- **Email Configuration**: SMTP server information
+- **Microservice Configuration**: RabbitMQ, Consul addresses
+- **Feature Switches**: [ImageGuard](https://github.com/ClaretWheel1481/ImageGuard), [Profanity Detector](https://github.com/ClaretWheel1481/ProfanityDetector), etc.
+
+For detailed configuration instructions, please refer to [CONFIG_README.md](CONFIG_README.md)
+
+### Acknowledgments
 - [Go](https://github.com/golang/go)
 - [Gin](https://github.com/gin-gonic/gin)
 - [gorm](https://github.com/go-gorm/gorm)
