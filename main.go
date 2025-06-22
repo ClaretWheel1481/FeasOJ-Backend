@@ -26,7 +26,6 @@ func main() {
 
 	// 定义目录映射
 	dirs := map[string]*string{
-		"config":      &global.ConfigDir,
 		"certificate": &global.CertDir,
 		"avatars":     &global.AvatarsDir,
 		"logs":        &global.LogDir,
@@ -53,7 +52,9 @@ func main() {
 	defer utils.CloseLogger(logFile)
 
 	// 初始化配置
-	config.InitConfig()
+	if err := config.InitConfig(); err != nil {
+		log.Fatalf("[FeasOJ] Failed to initialize config: %v", err)
+	}
 
 	// 初始化数据库
 	global.DB = utils.ConnectSql()
@@ -72,7 +73,7 @@ func main() {
 	}
 
 	// 测试邮箱模块是否正常
-	if utils.TestSend(config.InitEmailConfig()) {
+	if utils.TestSend(config.GlobalConfig.Mail) {
 		log.Println("[FeasOJ] Email service initialization complete")
 	} else {
 		log.Println("[FeasOJ] Email service startup failed, please check the configuration")
@@ -88,7 +89,7 @@ func main() {
 	}
 
 	// 测试ImageGuard连接
-	if config.ImageGuardEnabled {
+	if config.GlobalConfig.Features.ImageGuardEnabled {
 		if utils.ImageGuardPing() {
 			log.Println("[FeasOJ] ImageGuard service connection successful")
 		} else {
@@ -98,7 +99,7 @@ func main() {
 	}
 
 	// 测试ProfanityDetector连接
-	if config.ProfanityDetectorEnabled {
+	if config.GlobalConfig.Features.ProfanityDetectorEnabled {
 		if utils.ProfanityDetectorPing() {
 			log.Println("[FeasOJ] ProfanityDetector service connection successful")
 		} else {
@@ -147,32 +148,30 @@ func main() {
 		}
 	}
 
-	if config.EnableHTTPS {
-		go startServer("https", config.ServerAddress, config.ServerCertPath, config.ServerKeyPath)
+	if config.GlobalConfig.Server.EnableHTTPS {
+		go startServer("https", config.GlobalConfig.Server.Address, config.GlobalConfig.Server.CertPath, config.GlobalConfig.Server.KeyPath)
 	} else {
-		go startServer("http", config.ServerAddress, "", "")
+		go startServer("http", config.GlobalConfig.Server.Address, "", "")
 	}
 
-	log.Println("[FeasOJ] Server is running on", config.ServerAddress, "Https Status:", config.EnableHTTPS)
+	log.Println("[FeasOJ] Server is running on", config.GlobalConfig.Server.Address, "Https Status:", config.GlobalConfig.Server.EnableHTTPS)
 
 	// 监听终端输入
+	scanner := bufio.NewScanner(os.Stdin)
 	go func() {
-		scanner := bufio.NewScanner(os.Stdin)
 		for scanner.Scan() {
-			if scanner.Text() == "exit" || scanner.Text() == "EXIT" {
-				log.Println("[FeasOJ] The server is being shut down")
+			input := scanner.Text()
+			if input == "quit" || input == "exit" {
+				log.Println("[FeasOJ] Server is shutting down...")
 				os.Exit(0)
 			}
 		}
 	}()
 
-	// 等待中断信号关闭服务器
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	log.Println("[FeasOJ] Input 'exit' or CTRL+C to stop the server")
-	<-quit
+	// 监听系统信号
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	<-sigChan
 
-	// 关闭服务器前的清理工作
-	log.Println("[FeasOJ] The server is shutting down...")
-	utils.CloseLogger(logFile)
+	log.Println("[FeasOJ] Server is shutting down...")
 }

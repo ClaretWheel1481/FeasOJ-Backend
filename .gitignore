@@ -6,7 +6,7 @@
 *.sln
 *.sw?
 
-/config
+config.json
 /src/go.sum
 /logs
 /avatars

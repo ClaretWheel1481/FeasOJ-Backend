@@ -39,9 +39,13 @@ func CreateDiscussion(c *gin.Context) {
 	title := c.PostForm("title")
 	content := c.PostForm("content")
 
-	// 检测文本
-	if config.ProfanityDetectorEnabled {
-		if utils.DetectText(title) || utils.DetectText(content) {
+	// 检测文本是否包含敏感词汇
+	if config.GlobalConfig.Features.ProfanityDetectorEnabled {
+		if utils.DetectText(title) {
+			c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "profanity")})
+			return
+		}
+		if utils.DetectText(content) {
 			c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "profanity")})
 			return
 		}
@@ -123,13 +127,15 @@ func AddComment(c *gin.Context) {
 	// 设置限流键
 	rdb.Set(userRateLimitKey, 1, 10*time.Second)
 
-	profanity := false
-	if config.ProfanityDetectorEnabled {
+	// 检测文本是否包含敏感词汇
+	if config.GlobalConfig.Features.ProfanityDetectorEnabled {
 		if utils.DetectText(content) {
-			profanity = true
+			c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "profanity")})
+			return
 		}
 	}
-	if !sql.AddComment(content, did, userInfo.Uid, profanity) {
+
+	if !sql.AddComment(content, did, userInfo.Uid, false) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "failed")})
 		return
 	}

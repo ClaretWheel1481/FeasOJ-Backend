@@ -11,7 +11,7 @@ import (
 
 // ConnectRedis 连接到Redis并返回redis.Client对象
 func ConnectRedis() *redis.Client {
-	cfg := config.LoadRedisConfig()
+	cfg := config.GlobalConfig.Redis
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     cfg.Address,
 		Password: cfg.Password,

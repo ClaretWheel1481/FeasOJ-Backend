@@ -49,10 +49,15 @@ func InitTable() bool {
 
 // 返回数据库连接对象
 func ConnectSql() *gorm.DB {
-	dsn := config.LoadSqlConfig()
+	dsn := config.GetMySQLDSN()
+	if dsn == "" {
+		log.Println("[FeasOJ] Database connection failed, please check config.json configuration.")
+		return nil
+	}
+
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Println("[FeasOJ] Database connection failed, please go to config.xml manually to configure.")
+		log.Println("[FeasOJ] Database connection failed, please check config.json configuration.")
 		return nil
 	}
 	sqlDB, err := db.DB()
@@ -61,9 +66,9 @@ func ConnectSql() *gorm.DB {
 		return nil
 	}
 
-	sqlDB.SetMaxIdleConns(config.MaxIdleConns)
-	sqlDB.SetMaxOpenConns(config.MaxOpenConns)
-	sqlDB.SetConnMaxLifetime(config.MaxLifeTime * time.Second)
+	sqlDB.SetMaxIdleConns(config.GlobalConfig.MySQL.MaxIdleConns)
+	sqlDB.SetMaxOpenConns(config.GlobalConfig.MySQL.MaxOpenConns)
+	sqlDB.SetConnMaxLifetime(time.Duration(config.GlobalConfig.MySQL.MaxLifeTime) * time.Second)
 	return db
 }
 

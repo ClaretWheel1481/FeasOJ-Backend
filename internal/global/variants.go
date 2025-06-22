@@ -5,7 +5,6 @@ import (
 )
 
 // 全局变量 - 本地配置文件路径
-var ConfigDir string
 var LogDir string
 var AvatarsDir string
 var CurrentDir string

@@ -4,7 +4,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"math/rand"
-	"src/internal/global"
+	"src/internal/config"
 	"time"
 
 	"gopkg.in/gomail.v2"
@@ -16,13 +16,13 @@ func GenerateVerifycode() string {
 }
 
 // 发送验证码
-func SendVerifycode(config global.MailConfig, to string, verifycode string) bool {
+func SendVerifycode(mailConfig config.MailConfig, to string, verifycode string) bool {
 	m := gomail.NewMessage()
-	m.SetAddressHeader("From", config.User, "FeasOJ")
+	m.SetAddressHeader("From", mailConfig.User, "FeasOJ")
 	m.SetHeader("To", to)
 	m.SetHeader("Subject", "FeasOJ验证码")
 	m.SetBody("text/html", "<div style='text-align: center;'><h1><b>FeasOJ</b></h1><p>您正在进行敏感操作，<span style='color:red;'>5分钟后</span>失效</p><h1 style='letter-spacing: 10px;'><b>"+verifycode+"</b></h1></div>")
-	d := gomail.NewDialer(config.Host, config.Port, config.User, config.Password)
+	d := gomail.NewDialer(mailConfig.Host, mailConfig.Port, mailConfig.User, mailConfig.Password)
 	d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 	if err := d.DialAndSend(m); err != nil {
 		return false
@@ -34,13 +34,13 @@ func SendVerifycode(config global.MailConfig, to string, verifycode string) bool
 }
 
 // 测试发送
-func TestSend(config global.MailConfig) bool {
+func TestSend(mailConfig config.MailConfig) bool {
 	m := gomail.NewMessage()
-	m.SetAddressHeader("From", config.User, "FeasOJ")
-	m.SetHeader("To", config.User)
+	m.SetAddressHeader("From", mailConfig.User, "FeasOJ")
+	m.SetHeader("To", mailConfig.User)
 	m.SetHeader("Subject", "FeasOJ邮件服务测试")
 	m.SetBody("text/html", "<div style='text-align: center;'><h1><b>FeasOJ</b></h1><p>这是一封测试邮件，若看到该邮件意味着您的FeasOJ Email服务运行正常。</p></div>")
-	d := gomail.NewDialer(config.Host, config.Port, config.User, config.Password)
+	d := gomail.NewDialer(mailConfig.Host, mailConfig.Port, mailConfig.User, mailConfig.Password)
 	d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 	if err := d.DialAndSend(m); err != nil {
 		return false

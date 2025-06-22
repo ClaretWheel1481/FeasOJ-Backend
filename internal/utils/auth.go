@@ -34,10 +34,10 @@ func IsEmail(email string) bool {
 
 // 用户Token生成后返回给前端
 func GenerateToken(username string) (string, error) {
-	token := jwt.New(config.SigningMethod)
+	token := jwt.New(config.GetJWTSigningMethod())
 	claims := token.Claims.(jwt.MapClaims)
 	claims["username"] = username
-	claims["exp"] = time.Now().Add(config.TokenExpirePeriod).Unix()
+	claims["exp"] = time.Now().Add(config.GetJWTExpirePeriod()).Unix()
 	// 生成Token
 	tokenString, err := token.SignedString([]byte(SelectUser(username).TokenSecret))
 	if err != nil {

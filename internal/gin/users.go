@@ -2,7 +2,6 @@ package gincontext
 
 import (
 	"fmt"
-	"github.com/go-redis/redis"
 	"net/http"
 	"net/url"
 	"os"
@@ -13,6 +12,8 @@ import (
 	"src/internal/utils"
 	"src/internal/utils/sql"
 	"time"
+
+	"github.com/go-redis/redis"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -61,7 +62,7 @@ func Register(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "userAlreadyinUse")})
 		return
 	}
-	if config.ProfanityDetectorEnabled {
+	if config.GlobalConfig.Features.ProfanityDetectorEnabled {
 		if utils.DetectText(req.Username) {
 			c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "profanity")})
 			return
@@ -189,7 +190,7 @@ func GetCaptcha(c *gin.Context) {
 
 	// 发送验证码
 	code := utils.GenerateVerifycode()
-	sent := utils.SendVerifycode(config.InitEmailConfig(), email, code)
+	sent := utils.SendVerifycode(config.GlobalConfig.Mail, email, code)
 	if sent {
 		// 限流键写入，1分钟过期
 		rdb.Set(rateKey, 1, time.Minute)
@@ -238,17 +239,36 @@ func GetUserInfo(c *gin.Context) {
 // 更新密码
 func UpdatePassword(c *gin.Context) {
 	var req global.UpdatePasswordRequest
-	c.ShouldBind(&req)
+	if err := c.ShouldBind(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "invalidRequest")})
+		return
+	}
+
+	// 检查邮箱格式
+	if !utils.IsEmail(req.Email) {
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "invalidEmail")})
+		return
+	}
+
+	// 检查邮箱是否存在
+	if sql.SelectUserByEmail(req.Email).Username == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "emailNotExist")})
+		return
+	}
+
+	// 验证验证码
 	vcodeStatus := utils.CompareVerifyCode(req.Vcode, req.Email)
 	if !vcodeStatus {
 		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "captchaError")})
 		return
 	}
-	newPassword := utils.EncryptPassword(req.NewPassword)
-	if sql.UpdatePassword(req.Email, newPassword) {
+
+	// 更新密码
+	success := sql.UpdatePassword(req.Email, utils.EncryptPassword(req.NewPassword))
+	if success {
 		c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
 	} else {
-		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "failed")})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
 	}
 }
 
@@ -258,7 +278,7 @@ func UpdateSynopsis(c *gin.Context) {
 	encodedUsername := c.GetHeader("Username")
 	username, _ := url.QueryUnescape(encodedUsername)
 	// 更新简介
-	if config.ImageGuardEnabled {
+	if config.GlobalConfig.Features.ImageGuardEnabled {
 		if utils.DetectText(synopsis) {
 			c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "profanity")})
 			return
@@ -298,7 +318,7 @@ func UploadAvatar(c *gin.Context) {
 		return
 	}
 	// 检测图像，若违规则删除
-	if config.ProfanityDetectorEnabled {
+	if config.GlobalConfig.Features.ImageGuardEnabled {
 		if !utils.PredictImage(tempFilePath) {
 			c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "illegalImage")})
 
@@ -342,4 +362,36 @@ func GetRanking(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"ranking": ranking})
+}
+
+// 发送验证码
+func SendVerifycode(c *gin.Context) {
+	email := c.Query("email")
+	if email == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "invalidRequest")})
+		return
+	}
+
+	// 检查邮箱格式
+	if !utils.IsEmail(email) {
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "invalidEmail")})
+		return
+	}
+
+	// 检查邮箱是否已被注册
+	if sql.SelectUserByEmail(email).Username != "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": GetMessage(c, "emailAlreadyinUse")})
+		return
+	}
+
+	// 生成验证码
+	code := utils.GenerateVerifycode()
+
+	// 发送验证码
+	sent := utils.SendVerifycode(config.GlobalConfig.Mail, email, code)
+	if sent {
+		c.JSON(http.StatusOK, gin.H{"message": GetMessage(c, "success")})
+	} else {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": GetMessage(c, "internalServerError")})
+	}
 }

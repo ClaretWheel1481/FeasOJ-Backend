@@ -1,7 +1,6 @@
 package global
 
 import (
-	"encoding/xml"
 	"time"
 )
 
@@ -17,36 +16,6 @@ type JudgeResultMessage struct {
 	UserID    int    `json:"user_id"`
 	ProblemID int    `json:"problem_id"`
 	Status    string `json:"status"`
-}
-
-// 配置文件结构体
-type Config struct {
-	XMLName     xml.Name    `xml:"config"`
-	SqlConfig   MySqlConfig `xml:"sqlConfig"`
-	RedisConfig RedisConfig `xml:"redisConfig"`
-	MailConfig  MailConfig  `xml:"mailConfig"`
-}
-
-// MySQL数据库连接信息
-type MySqlConfig struct {
-	DbAddress  string `xml:"dbaddress"`
-	DbName     string `xml:"dbname"`
-	DbUser     string `xml:"dbuser"`
-	DbPassword string `xml:"dbpassword"`
-}
-
-// Redis数据连接信息
-type RedisConfig struct {
-	Address  string `xml:"address"`
-	Password string `xml:"password"`
-}
-
-// 邮件服务连接信息
-type MailConfig struct {
-	Host     string `xml:"host"`
-	Port     int    `xml:"port"`
-	User     string `xml:"user"`
-	Password string `xml:"password"`
 }
 
 // 注册请求体
@@ -198,13 +167,13 @@ type User struct {
 	Email       string    `gorm:"comment:电子邮件;not null"`
 	Synopsis    string    `gorm:"comment:简介"`
 	Score       int       `gorm:"comment:分数"`
-	CreateAt    time.Time `gorm:"comment:创建时间;not null"`
+	Create_at   time.Time `gorm:"comment:创建时间;not null"`
 	Role        int       `gorm:"comment:角色;not null"` // 0: 普通用户, 1: 管理员
 	TokenSecret string    `gorm:"comment:token密钥;not null"`
 	IsBan       bool      `gorm:"comment:是否被封禁;not null"`
 }
 
-// 题目表: pid, difficulty, title, content, time_limit, memory_limit, input, output, contestid, is_visible
+// 题目表：pid, difficulty, title, content, time_limit, memory_limit, input, output, contest_id, is_visible
 type Problem struct {
 	Pid         int    `gorm:"comment:题目ID;primaryKey;autoIncrement"`
 	Difficulty  string `gorm:"comment:难度;not null"`
@@ -218,7 +187,7 @@ type Problem struct {
 	IsVisible   bool   `gorm:"comment:是否可见;not null"`
 }
 
-// 提交记录表: Sid,Pid,Uid,Username,Result,Time,Language,Code
+// 提交记录表：sid, pid, uid, username, result, time, language, code
 type SubmitRecord struct {
 	Sid      int       `gorm:"comment:提交ID;primaryKey;autoIncrement"`
 	Pid      int       `gorm:"comment:题目ID"`
@@ -230,7 +199,7 @@ type SubmitRecord struct {
 	Code     string    `gorm:"comment:代码;not null"`
 }
 
-// 讨论帖子表: Did,Title,Content,Uid,Create_at
+// 讨论表：did, title, content, uid, create_at
 type Discussion struct {
 	Did       int       `gorm:"comment:讨论ID;primaryKey;autoIncrement"`
 	Title     string    `gorm:"comment:标题;not null"`
@@ -239,7 +208,7 @@ type Discussion struct {
 	Create_at time.Time `gorm:"comment:创建时间;not null"`
 }
 
-// 讨论评论表: Cid,Did,Content,Uid,Create_at
+// 评论表：cid, did, content, uid, create_at, profanity
 type Comment struct {
 	Cid       int       `gorm:"comment:评论ID;primaryKey;autoIncrement"`
 	Did       int       `gorm:"comment:帖子ID;not null"`
@@ -249,7 +218,7 @@ type Comment struct {
 	Profanity bool      `gorm:"comment:适合展示;not null"`
 }
 
-// 测试样例表: Tid, Pid, InputData, OutputData
+// 测试样例表：tid, pid, input_data, output_data
 type TestCase struct {
 	Tid        int    `gorm:"comment:测试样例ID;primaryKey;autoIncrement"`
 	Pid        int    `gorm:"comment:题目ID;not null"`
@@ -257,7 +226,7 @@ type TestCase struct {
 	OutputData string `gorm:"comment:输出数据;not null"`
 }
 
-// 竞赛表: ContestID, Title, Subtitle, Difficulty, Password, HavePassword, IsVisible, Status, Announcement, Start_at, End_at
+// 竞赛表：contest_id, title, subtitle, difficulty, password, scored, have_password, is_visible, status, announcement, start_at, end_at
 type Competition struct {
 	ContestID    int       `gorm:"comment:比赛ID;primaryKey;autoIncrement"`
 	Title        string    `gorm:"comment:标题;not null"`
@@ -273,7 +242,7 @@ type Competition struct {
 	End_at       time.Time `gorm:"comment:结束时间;not null"`
 }
 
-// 用户竞赛关系表: ContestID, Uid, Username, Join_date
+// 用户竞赛关联表：contest_id, uid, username, join_date, score
 type UserCompetitions struct {
 	ContestID int       `gorm:"comment:比赛ID;not null"`
 	Uid       int       `gorm:"comment:用户ID;not null"`

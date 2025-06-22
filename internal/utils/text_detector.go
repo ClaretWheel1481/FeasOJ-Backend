@@ -23,7 +23,7 @@ type PredictionResponse struct {
 // 获取Profanity Detector服务地址
 func GetProfanityDetectorAddress() string {
 	consulConfig := api.DefaultConfig()
-	consulConfig.Address = config.ConsulAddress
+	consulConfig.Address = config.GlobalConfig.Consul.Address
 	consulClient, err := api.NewClient(consulConfig)
 	if err != nil {
 		log.Println("[FeasOJ] Error connecting to Consul:", err)
@@ -48,56 +48,59 @@ func GetProfanityDetectorAddress() string {
 
 // DetectText 检测文本是否包含敏感词汇
 func DetectText(text string) bool {
-	payload := map[string]string{"text": text}
-	payloadBytes, err := json.Marshal(payload)
-	if err != nil {
-		return true
-	}
-
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/api/v1/text/predict", global.ProfanityDetectorAddr), bytes.NewBuffer(payloadBytes))
-	if err != nil {
-		return true
-	}
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return true
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return true
-	}
-
-	bodyBytes, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return true
-	}
-
-	var result PredictionResponse
-	err = json.Unmarshal(bodyBytes, &result)
-	if err != nil {
-		return true
-	}
-
-	// "normal" 表示合规，其他情况均视为违规
-	if result.Prediction == "normal" {
-		return false
-	}
-	return true
-}
-
-// ProfanityDetectorPing 检查服务是否可用
-func ProfanityDetectorPing() bool {
-	profanityDetectorAddress := GetProfanityDetectorAddress()
-	if profanityDetectorAddress == "" {
+	// 获取服务地址
+	serviceAddress := GetProfanityDetectorAddress()
+	if serviceAddress == "" {
 		log.Println("[FeasOJ] Unable to get ProfanityDetector address from Consul")
 		return false
 	}
 
-	resp, err := http.Get(profanityDetectorAddress)
+	// 准备请求数据
+	requestData := map[string]string{
+		"text": text,
+	}
+	jsonData, err := json.Marshal(requestData)
+	if err != nil {
+		log.Println("[FeasOJ] Error marshaling request data:", err)
+		return false
+	}
+
+	// 发送请求
+	resp, err := http.Post(serviceAddress, "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		log.Println("[FeasOJ] Error requesting ProfanityDetector:", err)
+		return false
+	}
+	defer resp.Body.Close()
+
+	// 读取响应
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("[FeasOJ] Error reading response body:", err)
+		return false
+	}
+
+	// 解析响应
+	var result PredictionResponse
+	if err := json.Unmarshal(body, &result); err != nil {
+		log.Println("[FeasOJ] Error unmarshaling response:", err)
+		return false
+	}
+
+	// 返回 true 表示预测结果为 "neutral"
+	return result.Prediction == "neutral"
+}
+
+// ProfanityDetectorPing 检查服务是否可用
+func ProfanityDetectorPing() bool {
+	serviceAddress := GetProfanityDetectorAddress()
+	if serviceAddress == "" {
+		log.Println("[FeasOJ] Unable to get ProfanityDetector address from Consul")
+		return false
+	}
+
+	// 发送ping请求
+	resp, err := http.Get(global.ProfanityDetectorAddr + "/api/v1/text/predict")
 	if err != nil {
 		log.Println("[FeasOJ] Error requesting ProfanityDetector:", err)
 		return false
