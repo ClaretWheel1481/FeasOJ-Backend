@@ -62,9 +62,8 @@ FeasOJ-Backend
 - **Redis配置**: Redis连接地址和密码
 - **邮件配置**: SMTP服务器信息
 - **微服务配置**: RabbitMQ、Consul地址
-- **功能开关**: [ImageGuard](https://github.com/ClaretWheel1481/ImageGuard)、[Profanity Detector](https://github.com/ClaretWheel1481/ProfanityDetector)检测等
+- **功能开关**: [ImageGuard](https://github.com/ClaretWheel1481/ImageGuard)、[Profanity Detector](https://github.com/ClaretWheel1481/ProfanityDetector)
 
-详细配置说明请参考 [CONFIG_README.md](CONFIG_README.md)
 
 ### 致谢
 - [Go](https://github.com/golang/go)
