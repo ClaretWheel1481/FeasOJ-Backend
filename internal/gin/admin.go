@@ -231,3 +231,9 @@ func GetScoreBoard(c *gin.Context) {
 		"total": total,
 	})
 }
+
+// 获取IP访问统计信息
+func GetIPStatistics(c *gin.Context) {
+	ipStatistics := sql.SelectIPStatistics()
+	c.JSON(http.StatusOK, gin.H{"ipStatistics": ipStatistics})
+}

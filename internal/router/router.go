@@ -156,6 +156,9 @@ func LoadRouter(r *gin.Engine) *gin.RouterGroup {
 
 		// 管理员查看竞赛得分情况
 		adminGroup.GET("/competitions/:cid/scoreboard", gincontext.GetScoreBoard)
+
+		// 管理员获取IP访问统计信息
+		adminGroup.GET("/ipstats", gincontext.GetIPStatistics)
 	}
 	return router1
 }

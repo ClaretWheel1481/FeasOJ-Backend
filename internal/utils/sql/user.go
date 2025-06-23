@@ -115,3 +115,10 @@ func SelectRank100Users() []global.UserInfoRequest {
 	global.DB.Table("users").Order("score desc").Limit(100).Find(&usersInfo)
 	return usersInfo
 }
+
+// 获取所有IP统计信息
+func SelectIPStatistics() []global.IPVisit {
+	var ipStatistics []global.IPVisit
+	global.DB.Table("ip_visits").Order("visit_count desc").Find(&ipStatistics)
+	return ipStatistics
+}

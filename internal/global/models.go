@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-// IP访问记录
+// IP访问记录表：ip, visit_count, last_visit
 type IPVisit struct {
 	IP         string    `gorm:"comment:IP;primaryKey;type:varchar(45)"`
 	VisitCount int64     `gorm:"comment:调用次数;not null;default:0"`
